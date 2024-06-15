@@ -327,11 +327,11 @@ export const createCrudOptions = function ({ crudExpose }: CreateCrudOptionsProp
 					},
 				},
 				...commonCrudConfig({
-					create_datetime: {
-						search: true
-					}
-				})
-			},
+                    create_datetime: {
+                        search: true
+                    }
+                })
+            },
 		},
 	};
 };

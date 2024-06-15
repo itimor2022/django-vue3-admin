@@ -2,38 +2,7 @@ import {dict} from "@fast-crud/fast-crud";
 import {shallowRef} from 'vue'
 import deptFormat from "/@/components/dept-format/index.vue";
 
-export const commonCrudConfig = (options = {
-    create_datetime: {
-        form: false,
-        table: false,
-        search: false
-    },
-    update_datetime: {
-        form: false,
-        table: false,
-        search: false
-    },
-    creator_name: {
-        form: false,
-        table: false,
-        search: false
-    },
-    modifier_name: {
-        form: false,
-        table: false,
-        search: false
-    },
-    dept_belong_id: {
-        form: false,
-        table: false,
-        search: false
-    },
-    description: {
-        form: false,
-        table: false,
-        search: false
-    },
-}) => {
+export const commonCrudConfig = (options?: {}) => {
     return {
         dept_belong_id: {
             title: '所属部门',
