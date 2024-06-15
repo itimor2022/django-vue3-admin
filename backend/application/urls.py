@@ -75,6 +75,7 @@ urlpatterns = (
             path('admin/', admin.site.urls),
             path("api/system/", include("dvadmin.system.urls")),
             path("api/project/", include("dvadmin.project.urls")),
+            path("api/asset/", include("dvadmin.asset.urls")),
             path("api/login/", LoginView.as_view(), name="token_obtain_pair"),
             path("api/logout/", LogoutView.as_view(), name="token_obtain_pair"),
             path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
