@@ -17,13 +17,11 @@ from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-# BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-
 # ================================================= #
 # ******************** 动态配置 ******************** #
 # ================================================= #
 
-from backend.conf.env import *
+from conf.env import *
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -384,7 +382,7 @@ API_LOG_ENABLE = True
 API_LOG_METHODS = ["POST", "UPDATE", "DELETE", "PUT"]  # ['POST', 'DELETE']
 API_MODEL_MAP = {
     "/token/": "登录模块",
-    "/api/login/": "登录模块",
+    "/api/login/": "登模块",
     "/api/plugins_market/plugins/": "插件市场",
 }
 
@@ -415,7 +413,7 @@ PLUGINS_URL_PATTERNS = []
 # ********** 一键导入插件配置开始 **********
 # 例如:
 # from dvadmin_upgrade_center.settings import *    # 升级中心
-# from dvadmin_celery.settings import *            # celery 异步任务
+# from dvadmin_celery.settings import *            # celery 步任务
 # from dvadmin_third.settings import *            # 第三方用户管理
 # from dvadmin_ak_sk.settings import *            # 秘钥管理管理
 # from dvadmin_tenants.settings import *            # 租户管理
