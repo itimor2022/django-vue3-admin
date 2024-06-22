@@ -76,12 +76,12 @@ class CloudFlareApi:
 
 
 if __name__ == '__main__':
-    godadd_ac = Account(api_key='gHzap6zE4keX_2NaopMBRt4JRKcczEUbqDw', api_secret='VppHYw5ALkdtzW9XaPb6Ls')
+    godadd_ac = Account(api_key='h1UXtXE3kZb8_NmcVoHPRtygCfM8P9e27w1', api_secret='CyQACC2NyePptyLXT3asRc')
     gd = Client(godadd_ac)
     # cf = CloudFlare.CloudFlare(email='leapkeji@gmail.com', key='c50dda35b1d4370a80610928b75eeeac6ded1')
     cf = CloudFlare.CloudFlare(email='mario755132@gmail.com', key='c68b7b980ea090fd803189d97152acd6618ff')
     record_type = 'A'
-    record_content = '16.163.42.83'
+    record_content = '16.163.109.86'
     proxied = True
     with open("domains.txt", "r") as f:
         lines = f.readlines()
