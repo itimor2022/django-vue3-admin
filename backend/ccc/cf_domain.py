@@ -3,6 +3,16 @@
 
 import CloudFlare
 from godaddypy import Client, Account
+from hashlib import md5
+
+
+def encrypt_md5(s):
+    # 创建md5对象
+    new_md5 = md5()
+    # 这里必须用encode()函数对字符串进行编码，不然会报 TypeError: Unicode-objects must be encoded before hashing
+    new_md5.update(s.encode(encoding='utf-8'))
+    # 加密
+    return new_md5.hexdigest()
 
 
 class CloudFlareApi:
@@ -21,7 +31,7 @@ class CloudFlareApi:
             zone_info = self.cf.zones.get(params={'name': zone})
             print(zone_info)
 
-    def add_record(self):
+    def add_zone_record(self):
         for line in lines:
             d = line.split()
             zone = d[0]
@@ -31,8 +41,8 @@ class CloudFlareApi:
             print("打印nameserver")
             ns_data = {"nameServers": zone_info['name_servers']}
             print(ns_data)
-            print("更新godaddy ns")
-            gd.update_domain(zone, **ns_data)
+            # print("更新godaddy ns")
+            # gd.update_domain(zone, **ns_data)
 
             zone_id = zone_info['id']
 
@@ -53,6 +63,25 @@ class CloudFlareApi:
                 r = self.cf.zones.dns_records.post(zone_id, data=dns_record_data)
                 print(r)
 
+    def add_record(self):
+        for line in lines:
+            d = line.split()
+            zone = d[0]
+            print(zone)
+            # 获取zone_id
+            zone_info = self.cf.zones.get(params={'name': zone})
+            zone_id = zone_info[0]['id']
+            for i in range(1, len(d)):
+                record_name = d[i]
+                print(record_name)
+                print("添加dns解析")
+                dns_record_data = {'name': record_name, 'type': self.record_type, 'content': self.record_content,
+                                   'proxied': self.proxied}
+                print(zone_id)
+                print(dns_record_data)
+                r = self.cf.zones.dns_records.post(zone_id, data=dns_record_data)
+                print(r)
+
     def update_record(self):
         for line in lines:
             d = line.split()
@@ -70,9 +99,19 @@ class CloudFlareApi:
                 print(dns_record)
                 dns_record_id = dns_record[0]['id']
                 dns_record_data = {'name': record_name, 'type': self.record_type, 'content': self.record_content,
-                                   'proxied': self.proxied}
+                                   'proxied': self.proxied, 'ttl': 600, }
                 r = self.cf.zones.dns_records.put(zone_id, dns_record_id, data=dns_record_data)
                 print(r)
+
+    def delete_record(self):
+        for line in lines:
+            d = line.split()
+            zone = d[0]
+            print(zone)
+            # 获取zone_id
+            zone_info = self.cf.zones.get(params={'name': zone})
+            zone_id = zone_info[0]['id']
+            self.cf.zones.delete(zone_id)
 
 
 if __name__ == '__main__':
@@ -81,11 +120,13 @@ if __name__ == '__main__':
     # cf = CloudFlare.CloudFlare(email='leapkeji@gmail.com', key='c50dda35b1d4370a80610928b75eeeac6ded1')
     cf = CloudFlare.CloudFlare(email='mario755132@gmail.com', key='c68b7b980ea090fd803189d97152acd6618ff')
     record_type = 'A'
-    record_content = '16.163.109.86'
+    record_content = '16.163.81.193'
     proxied = True
     with open("domains.txt", "r") as f:
         lines = f.readlines()
         c = CloudFlareApi(cf, record_type, record_content, proxied)
         # c.scan_zone()
-        c.add_record()
+        # c.add_zone_record()
         # c.update_record()
+        # c.delete_record()
+        c.add_record()
