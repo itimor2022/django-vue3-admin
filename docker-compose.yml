@@ -89,23 +89,23 @@ services:
       network:
         ipv4_address: 177.10.0.12
 
-  dvadmin3-web:
-     container_name: dvadmin3-web
-     ports:
-       - "8080:8080"
-     build:
-       context: ./
-       dockerfile: ./docker_env/web/Dockerfile
-     environment:
-       TZ: Asia/Shanghai
-     volumes:
-       - ./docker_env/nginx/my.conf:/etc/nginx/conf.d/my.conf
-     expose:
-       - "8080"
-     restart: always
-     networks:
-       network:
-         ipv4_address: 177.10.0.11
+#  dvadmin3-web:
+#     container_name: dvadmin3-web
+#     ports:
+#       - "8080:8080"
+#     build:
+#       context: ./
+#       dockerfile: ./docker_env/web/Dockerfile
+#     environment:
+#       TZ: Asia/Shanghai
+#     volumes:
+#       - ./docker_env/nginx/my.conf:/etc/nginx/conf.d/my.conf
+#     expose:
+#       - "8080"
+#     restart: always
+#     networks:
+#       network:
+#         ipv4_address: 177.10.0.11
 
 networks:
   network:
