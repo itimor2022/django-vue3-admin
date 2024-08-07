@@ -1,0 +1,1 @@
+import{a3 as p,Y as r}from"./index.acfe672b.js";import{a as n}from"./vue.5d8927be.js";const m=n({name:"FsUploader",props:{type:{}},setup(e){async function t(){const{getDefaultType:a}=r(),o=e.type||a();return await p(o)}return{getUploaderRef:t}}});export{m as default};

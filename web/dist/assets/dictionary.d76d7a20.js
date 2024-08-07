@@ -1,0 +1,1 @@
+import{p as c}from"./index.acfe672b.js";import{ag as s}from"./vue.5d8927be.js";const f=(o,t)=>{const a=c(),r=s(a.data);if(t!=null){const i=r[o].find(n=>n.value===t);return i?i.label:""}else return r[o]};export{f as d};

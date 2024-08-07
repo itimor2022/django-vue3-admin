@@ -1,0 +1,1 @@
+import{_ as o}from"./_plugin-vue_export-helper.c27b6911.js";import{ak as t,o as a,Q as n,R as s,V as c}from"./vue.5d8927be.js";const r={};function _(f,p){const e=t("fs-page");return a(),n(e,null,{default:s(()=>[c(" demo ")]),_:1})}const l=o(r,[["render",_]]);export{l as default};
