@@ -14,8 +14,8 @@ class CloudFlareApi:
 
     def list_zone(self):
         name = 'ends_with:com'
-        page = 1
-        per_page = 20
+        page = 2
+        per_page = 300
         status = 'active'
         params = {'page': page, 'per_page': per_page, 'name': name, 'status': status}
         zones = cf.zones.get(params=params)
@@ -104,7 +104,7 @@ class CloudFlareApi:
             zone_id = zone_info[0]['id']
             self.cf.zones.delete(zone_id)
 
-    def add_random_record(self):
+    def add_random_record(self, t):
         e_list = ['z', 'y', 'x', 'w', 'v', 'u', 't', 's', 'r', 'q', 'p', 'o', 'n', 'm', 'l', 'k', 'j', 'i', 'h', 'g',
                   'f', 'e', 'd', 'c', 'b', 'a', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
         r_list = []
@@ -115,7 +115,7 @@ class CloudFlareApi:
             zone_info = self.cf.zones.get(params={'name': zone})
             zone_id = zone_info[0]['id']
 
-            record_name = ''.join(random.sample(e_list, 5))
+            record_name = t + ''.join(random.sample(e_list, 5))
             r_list.append(f'{record_name}.{zone}')
             dns_record_data = {'name': record_name, 'type': self.record_type, 'content': self.record_content,
                                    'proxied': False}
@@ -136,8 +136,8 @@ if __name__ == '__main__':
         c = CloudFlareApi(cf, record_type, record_content, proxied)
         # c.scan_zone()
         # c.add_zone_record()
-        c.update_record()
+        # c.update_record()
         # c.delete_record()
         # c.list_zone()
         # c.add_record()
-        # c.add_random_record()
+        c.add_random_record('file')
