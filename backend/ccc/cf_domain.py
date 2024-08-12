@@ -129,15 +129,15 @@ if __name__ == '__main__':
     # cf = CloudFlare.CloudFlare(email='leapkeji@gmail.com', key='c50dda35b1d4370a80610928b75eeeac6ded1')
     cf = CloudFlare.CloudFlare(email='mario755132@gmail.com', key='c68b7b980ea090fd803189d97152acd6618ff')
     record_type = 'A'
-    record_content = '16.163.26.223'
-    proxied = True
+    record_content = '18.166.7.204'
+    proxied = False
     with open("domains.txt", "r") as f:
         lines = f.readlines()
         c = CloudFlareApi(cf, record_type, record_content, proxied)
         # c.scan_zone()
         # c.add_zone_record()
-        # c.update_record()
+        c.update_record()
         # c.delete_record()
         # c.list_zone()
         # c.add_record()
-        c.add_random_record('file')
+        # c.add_random_record('file')
