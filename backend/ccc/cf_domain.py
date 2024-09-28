@@ -125,8 +125,8 @@ if __name__ == '__main__':
     with open("domains.txt", "r") as f:
         lines = f.readlines()
         c = CloudFlareApi(cf, record_type, record_content, proxied)
-        # c.scan_zone()
+        c.scan_zone()
         # c.add_zone_record()
         # c.update_record()
         # c.delete_record()
-        c.add_record()
+        # c.add_record()
