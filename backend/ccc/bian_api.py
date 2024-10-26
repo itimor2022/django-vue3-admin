@@ -8,16 +8,20 @@ typ = 'USDT'
 
 
 def get_pairs():
+    exclude_pair_list = ['USDCUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'PEPEUSDT', 'DOGEUSDT', 'TONUSDT', 'XRPUSDT',
+                         'BCHUSDT', 'LTCUSDT', 'SHIBUSDT', 'TONUSDT']
     t = int(time.time())
+    print(t)
     url = f"https://www.okx.com/priapi/v5/rubik/web/public/turn-over-rank?countryFilter=1&rank=0&period={period}&type={typ}&t={t}"
     r = requests.get(url)
     c = r.json()['data']['data']
     c_list = []
     for i in c:
         p = i['instId'].replace('-', '')
-        c_list.append(p)
+        if p not in exclude_pair_list:
+            c_list.append(p)
     print(c_list)
-    return c_list[:30]
+    return c_list[:20]
 
 
 def main():
@@ -26,45 +30,63 @@ def main():
     type_b = '做多'
     type_s = '做空'
 
-    d = {}
-
+    s = {}
+    t = {}
     for index, pair in enumerate(pair_list):
+        m = 2
+        n = 2
         print(index)
-        print(pair)
+        p = pair.split('USDT')[0]
+        print(p)
         r1 = futures_client.long_short_account_ratio(pair, period)
         d1 = sorted(r1, key=itemgetter('timestamp'), reverse=True)
-        print(d1)
+
         if len(d1) > 0:
             if float(d1[0]['longShortRatio']) > 1:
-                print(type_b)
+                t1 = float(d1[0]['longAccount']) / float(d1[1]['shortAccount'])
+                t2 = float(d1[0]['longAccount']) / float(d1[2]['longAccount'])
+                if t1 > m or t2 > m:
+                    print(t1)
+                    print(t2)
+                    print(f'多倍{type_b}')
+                t[p] = f'+{max(t1, t2)}'
             else:
-                print(type_s)
-
+                t1 = float(d1[0]['shortAccount']) / float(d1[1]['longAccount'])
+                t2 = float(d1[0]['shortAccount']) / float(d1[2]['longAccount'])
+                if t1 > m or t2 > m:
+                    print(t1)
+                    print(t2)
+                    print(f'多倍{type_s}')
+                t[p] = f'-{max(t1, t2)}'
 
             r2 = futures_client.taker_long_short_ratio(pair, period)
             d2 = sorted(r2, key=itemgetter('timestamp'), reverse=True)
-            print(d2)
-            n = 2
             if float(d2[0]['buySellRatio']) > 1:
+                s1 = float(d2[0]['buyVol']) / float(d2[1]['buyVol'])
                 s2 = float(d2[0]['buyVol']) / float(d2[2]['buyVol'])
-                s3 = float(d2[0]['buyVol']) / float(d2[3]['buyVol'])
-                if s2 > n or s3 > n:
+                if s1 > n or s2 > n:
+                    print(s1)
                     print(s2)
-                    print(s3)
                     print(f'多倍{type_b}')
+                s[p] = f'+{max(s1, s2)}'
             else:
+                s1 = float(d2[0]['sellVol']) / float(d2[1]['sellVol'])
                 s2 = float(d2[0]['sellVol']) / float(d2[2]['sellVol'])
-                s3 = float(d2[0]['sellVol']) / float(d2[3]['sellVol'])
-                if s2 > n or s3 > n:
+                if s1 > n or s2 > n:
+                    print(s1)
                     print(s2)
-                    print(s3)
                     print(f'多倍{type_s}')
-            d[pair] = max(s2, s3)
+                s[p] = f'-{max(s1, s2)}'
 
-    print(d)
-    dd = sorted(d.items(), key=itemgetter(1), reverse=True)
-    print(dd)
+    print("***************** 多空持仓人数 *****************")
+    print(t)
+    tt = dict(sorted(t.items(), key=itemgetter(1), reverse=True))
+    print(tt)
 
+    print("***************** 主动买卖量比 *****************")
+    print(s)
+    ss = dict(sorted(s.items(), key=itemgetter(1), reverse=True))
+    print(ss)
 
 
 if __name__ == '__main__':
