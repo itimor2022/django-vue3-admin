@@ -30,14 +30,15 @@ def main():
     type_b = '做多'
     type_s = '做空'
 
-    s = {}
+    s = []
     t = {}
     for index, pair in enumerate(pair_list):
         m = 2
-        n = 2
+        n = 5
         print(index)
         p = pair.split('USDT')[0]
         print(p)
+        t['pair'] = p
         r1 = futures_client.long_short_account_ratio(pair, period)
         d1 = sorted(r1, key=itemgetter('timestamp'), reverse=True)
 
@@ -49,7 +50,6 @@ def main():
                     print(t1)
                     print(t2)
                     print(f'多倍{type_b}')
-                t[p] = f'+{max(t1, t2)}'
             else:
                 t1 = float(d1[0]['shortAccount']) / float(d1[1]['longAccount'])
                 t2 = float(d1[0]['shortAccount']) / float(d1[2]['longAccount'])
@@ -57,7 +57,7 @@ def main():
                     print(t1)
                     print(t2)
                     print(f'多倍{type_s}')
-                t[p] = f'-{max(t1, t2)}'
+            t['t1'] = max(t1, t2)
 
             r2 = futures_client.taker_long_short_ratio(pair, period)
             d2 = sorted(r2, key=itemgetter('timestamp'), reverse=True)
@@ -68,7 +68,6 @@ def main():
                     print(s1)
                     print(s2)
                     print(f'多倍{type_b}')
-                s[p] = f'+{max(s1, s2)}'
             else:
                 s1 = float(d2[0]['sellVol']) / float(d2[1]['sellVol'])
                 s2 = float(d2[0]['sellVol']) / float(d2[2]['sellVol'])
@@ -76,17 +75,14 @@ def main():
                     print(s1)
                     print(s2)
                     print(f'多倍{type_s}')
-                s[p] = f'-{max(s1, s2)}'
+            t['t2'] = max(s1, s2)
 
-    print("***************** 多空持仓人数 *****************")
-    print(t)
-    tt = dict(sorted(t.items(), key=itemgetter(1), reverse=True))
-    print(tt)
-
-    print("***************** 主动买卖量比 *****************")
+        print(t)
+        s.append(t)
     print(s)
-    ss = dict(sorted(s.items(), key=itemgetter(1), reverse=True))
-    print(ss)
+    print("***************** 主动买卖量比 *****************")
+    # ss = dict(sorted(s.items(), key=itemgetter('t2'), reverse=True))
+    # print(ss)
 
 
 if __name__ == '__main__':
