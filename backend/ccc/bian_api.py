@@ -21,7 +21,7 @@ def get_pairs():
         if p not in exclude_pair_list:
             c_list.append(p)
     print(c_list)
-    return c_list[:20]
+    return c_list[:30]
 
 
 def main():
@@ -30,19 +30,22 @@ def main():
     type_b = '做多'
     type_s = '做空'
 
-    s = []
-    t = {}
+    h = list()
     for index, pair in enumerate(pair_list):
+        k = dict()
         m = 2
         n = 5
         print(index)
         p = pair.split('USDT')[0]
-        print(p)
-        t['pair'] = p
         r1 = futures_client.long_short_account_ratio(pair, period)
         d1 = sorted(r1, key=itemgetter('timestamp'), reverse=True)
 
+        print(p)
+        k['pair'] = p
+        k['t'] = 0.0
+        k['s'] = 0.0
         if len(d1) > 0:
+
             if float(d1[0]['longShortRatio']) > 1:
                 t1 = float(d1[0]['longAccount']) / float(d1[1]['shortAccount'])
                 t2 = float(d1[0]['longAccount']) / float(d1[2]['longAccount'])
@@ -57,7 +60,7 @@ def main():
                     print(t1)
                     print(t2)
                     print(f'多倍{type_s}')
-            t['t1'] = max(t1, t2)
+            k['t'] = max(t1, t2)
 
             r2 = futures_client.taker_long_short_ratio(pair, period)
             d2 = sorted(r2, key=itemgetter('timestamp'), reverse=True)
@@ -75,14 +78,13 @@ def main():
                     print(s1)
                     print(s2)
                     print(f'多倍{type_s}')
-            t['t2'] = max(s1, s2)
+            k['s'] = max(s1, s2)
 
-        print(t)
-        s.append(t)
-    print(s)
+        h.append(dict(k))
+    print(h)
     print("***************** 主动买卖量比 *****************")
-    # ss = dict(sorted(s.items(), key=itemgetter('t2'), reverse=True))
-    # print(ss)
+    ss = sorted(h, key=itemgetter('s'), reverse=True)
+    print(ss)
 
 
 if __name__ == '__main__':
