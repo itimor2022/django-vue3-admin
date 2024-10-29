@@ -26,8 +26,8 @@ def get_pairs():
 
 
 def main():
-    pair_list = ['ICPUSDT']
-    # pair_list = get_pairs()
+    #pair_list = ['ICPUSDT']
+    pair_list = get_pairs()
     type_b = '做多'
     type_s = '做空'
 
