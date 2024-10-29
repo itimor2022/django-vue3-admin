@@ -70,7 +70,6 @@ def main():
                 r['buyVol'] = float(r['buyVol'])
                 r3.append(r)
             d2 = sorted(r3, key=itemgetter('timestamp'), reverse=True)
-            print(d2)
             if float(d2[0]['buySellRatio']) > 1:
                 d1 = sorted(r3, key=itemgetter('buyVol'), reverse=True)
                 s1 = d2[0]['buyVol'] / d2[1]['buyVol']
@@ -87,7 +86,6 @@ def main():
                     print(s1)
                     print(s2)
                     print(f'多倍{type_s}')
-            print(d1)
             k['s'] = max(s1, s2)
 
         h.append(dict(k))
