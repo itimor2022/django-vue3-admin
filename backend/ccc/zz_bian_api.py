@@ -25,8 +25,8 @@ def get_pairs():
 
 
 def main():
-    # pair_list = ['PEPEUSDT']
-    pair_list = get_pairs()
+    pair_list = ['ICPUSDT']
+    #pair_list = get_pairs()
     type_b = '做多'
     type_s = '做空'
 
@@ -46,38 +46,47 @@ def main():
         k['s'] = 0.0
         if len(d1) > 0:
 
-            if float(d1[0]['longShortRatio']) > 1:
-                t1 = float(d1[0]['longAccount']) / float(d1[1]['shortAccount'])
-                t2 = float(d1[0]['longAccount']) / float(d1[2]['longAccount'])
-                if t1 > m or t2 > m:
-                    print(t1)
-                    print(t2)
-                    print(f'多倍{type_b}')
-            else:
-                t1 = float(d1[0]['shortAccount']) / float(d1[1]['longAccount'])
-                t2 = float(d1[0]['shortAccount']) / float(d1[2]['longAccount'])
-                if t1 > m or t2 > m:
-                    print(t1)
-                    print(t2)
-                    print(f'多倍{type_s}')
-            k['t'] = max(t1, t2)
+            # if float(d1[0]['longShortRatio']) > 1:
+            #     t1 = float(d1[0]['longAccount']) / float(d1[1]['shortAccount'])
+            #     t2 = float(d1[0]['longAccount']) / float(d1[2]['longAccount'])
+            #     if t1 > m or t2 > m:
+            #         print(t1)
+            #         print(t2)
+            #         print(f'多倍{type_b}')
+            # else:
+            #     t1 = float(d1[0]['shortAccount']) / float(d1[1]['longAccount'])
+            #     t2 = float(d1[0]['shortAccount']) / float(d1[2]['longAccount'])
+            #     if t1 > m or t2 > m:
+            #         print(t1)
+            #         print(t2)
+            #         print(f'多倍{type_s}')
+            # k['t'] = max(t1, t2)
 
-            r2 = futures_client.taker_long_short_ratio(pair, period)
-            d2 = sorted(r2, key=itemgetter('timestamp'), reverse=True)
+            r2 = futures_client.taker_long_short_ratio(pair, period, limit=50)
+            r3 = list()
+            for r in r2:
+                r['sellVol'] = float(r['sellVol'])
+                r['buyVol'] = float(r['buyVol'])
+                r3.append(r)
+            d2 = sorted(r3, key=itemgetter('timestamp'), reverse=True)
             if float(d2[0]['buySellRatio']) > 1:
-                s1 = float(d2[0]['buyVol']) / float(d2[1]['buyVol'])
-                s2 = float(d2[0]['buyVol']) / float(d2[2]['buyVol'])
-                if s1 > n or s2 > n:
+                d1 = sorted(r3, key=itemgetter('buyVol'), reverse=True)
+                s1 = d2[0]['buyVol'] / d2[1]['buyVol']
+                s2 = d2[0]['buyVol'] / d2[2]['buyVol']
+                if s1 > n or s2 > n and d1[0] is d2[0]:
                     print(s1)
                     print(s2)
                     print(f'多倍{type_b}')
             else:
-                s1 = float(d2[0]['sellVol']) / float(d2[1]['sellVol'])
-                s2 = float(d2[0]['sellVol']) / float(d2[2]['sellVol'])
-                if s1 > n or s2 > n:
+                d1 = sorted(r3, key=itemgetter('sellVol'), reverse=True)
+                s1 = d1[0]['sellVol'] / d1[1]['sellVol']
+                s2 = d1[0]['sellVol'] / d1[2]['sellVol']
+                if s1 > n or s2 > n and d1[0] is d2[0]:
                     print(s1)
                     print(s2)
                     print(f'多倍{type_s}')
+            print(d1)
+            print(d2)
             k['s'] = max(s1, s2)
 
         h.append(dict(k))
