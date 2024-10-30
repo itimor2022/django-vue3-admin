@@ -5,11 +5,20 @@ import time
 
 period = '5m'
 typ = 'USDT'
-print("*"*100)
+print("*" * 100)
 t = int(time.time())
 timeArray = time.localtime(t)
 otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
 print(otherStyleTime)
+
+
+def send_message(msg):
+    chat_id = "-4591709428"
+    token = "7114302389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
+    url = f"https://api.telegram.org/bot{token}/sendMessage?chat_id={chat_id}&text={msg}"
+    r = requests.get(url)
+    print(r)
+
 
 def get_pairs():
     exclude_pair_list = ['USDCUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'PEPEUSDT', 'DOGEUSDT', 'TONUSDT', 'XRPUSDT',
@@ -27,7 +36,7 @@ def get_pairs():
 
 
 def main():
-    #pair_list = ['ICPUSDT']
+    # pair_list = ['ICPUSDT']
     pair_list = get_pairs()
     type_b = '做多'
     type_s = '做空'
@@ -35,8 +44,8 @@ def main():
     h = list()
     for index, pair in enumerate(pair_list):
         k = dict()
-        m = 2
-        n = 5
+        m = 2.5
+        n = 2.7
         print(index)
         p = pair.split('USDT')[0]
         r1 = futures_client.long_short_account_ratio(pair, period)
@@ -87,7 +96,11 @@ def main():
                     print(s1)
                     print(s2)
                     print(f'主动买卖多倍{type_s}')
-            k['s'] = max(s1, s2)
+            s = max(s1, s2)
+            k['s'] = s
+            print("发送消息")
+            msg = f"{otherStyleTime} {p} {s}"
+            send_message(msg)
 
         h.append(dict(k))
     print(h)
