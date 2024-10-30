@@ -48,21 +48,21 @@ def main():
         k['s'] = 0.0
         if len(d1) > 0:
 
-            if float(d1[0]['longShortRatio']) > 1:
-                t1 = float(d1[0]['longAccount']) / float(d1[1]['shortAccount'])
-                t2 = float(d1[0]['longAccount']) / float(d1[2]['longAccount'])
-                if t1 > m or t2 > m:
-                    print(t1)
-                    print(t2)
-                    print(f'多倍{type_b}')
-            else:
-                t1 = float(d1[0]['shortAccount']) / float(d1[1]['longAccount'])
-                t2 = float(d1[0]['shortAccount']) / float(d1[2]['longAccount'])
-                if t1 > m or t2 > m:
-                    print(t1)
-                    print(t2)
-                    print(f'多倍{type_s}')
-            k['t'] = max(t1, t2)
+            # if float(d1[0]['longShortRatio']) > 1:
+            #     t1 = float(d1[0]['longAccount']) / float(d1[1]['shortAccount'])
+            #     t2 = float(d1[0]['longAccount']) / float(d1[2]['longAccount'])
+            #     if t1 > m or t2 > m:
+            #         print(t1)
+            #         print(t2)
+            #         print(f'多倍{type_b}')
+            # else:
+            #     t1 = float(d1[0]['shortAccount']) / float(d1[1]['longAccount'])
+            #     t2 = float(d1[0]['shortAccount']) / float(d1[2]['longAccount'])
+            #     if t1 > m or t2 > m:
+            #         print(t1)
+            #         print(t2)
+            #         print(f'多倍{type_s}')
+            # k['t'] = max(t1, t2)
 
             r2 = futures_client.taker_long_short_ratio(pair, period, limit=50)
             r3 = list()
