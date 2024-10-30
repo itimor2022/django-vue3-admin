@@ -5,14 +5,16 @@ import time
 
 period = '5m'
 typ = 'USDT'
-
+print("*"*140)
+t = int(time.time())
+timeArray = time.localtime(t)
+otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+print(otherStyleTime)
 
 def get_pairs():
     exclude_pair_list = ['USDCUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'PEPEUSDT', 'DOGEUSDT', 'TONUSDT', 'XRPUSDT',
                          'BCHUSDT', 'LTCUSDT', 'SHIBUSDT', 'TONUSDT']
-    t = int(time.time())
-    print(t)
-    url = f"https://www.okx.com/priapi/v5/rubik/web/public/turn-over-rank?countryFilter=1&rank=0&period={period}&type={typ}&t={t}"
+    url = f"https://www.okx.com/priapi/v5/rubik/web/public/up-down-rank?countryFilter=1&rank=1&zone=utc8&period={period}&type={typ}&t={t}"
     r = requests.get(url)
     c = r.json()['data']['data']
     c_list = []
@@ -21,11 +23,11 @@ def get_pairs():
         if p not in exclude_pair_list:
             c_list.append(p)
     print(c_list)
-    return c_list[:30]
+    return c_list[:10]
 
 
 def main():
-    # pair_list = ['PEPEUSDT']
+    #pair_list = ['ICPUSDT']
     pair_list = get_pairs()
     type_b = '做多'
     type_s = '做空'
@@ -52,32 +54,39 @@ def main():
                 if t1 > m or t2 > m:
                     print(t1)
                     print(t2)
-                    print(f'多倍{type_b}')
+                    print(f'多空持仓多倍{type_b}')
             else:
                 t1 = float(d1[0]['shortAccount']) / float(d1[1]['longAccount'])
                 t2 = float(d1[0]['shortAccount']) / float(d1[2]['longAccount'])
                 if t1 > m or t2 > m:
                     print(t1)
                     print(t2)
-                    print(f'多倍{type_s}')
+                    print(f'多空持仓多倍{type_s}')
             k['t'] = max(t1, t2)
 
-            r2 = futures_client.taker_long_short_ratio(pair, period)
-            d2 = sorted(r2, key=itemgetter('timestamp'), reverse=True)
+            r2 = futures_client.taker_long_short_ratio(pair, period, limit=50)
+            r3 = list()
+            for r in r2:
+                r['sellVol'] = float(r['sellVol'])
+                r['buyVol'] = float(r['buyVol'])
+                r3.append(r)
+            d2 = sorted(r3, key=itemgetter('timestamp'), reverse=True)
             if float(d2[0]['buySellRatio']) > 1:
-                s1 = float(d2[0]['buyVol']) / float(d2[1]['buyVol'])
-                s2 = float(d2[0]['buyVol']) / float(d2[2]['buyVol'])
-                if s1 > n or s2 > n:
+                d1 = sorted(r3, key=itemgetter('buyVol'), reverse=True)
+                s1 = d2[0]['buyVol'] / d2[1]['buyVol']
+                s2 = d2[0]['buyVol'] / d2[2]['buyVol']
+                if s1 > n or s2 > n and d1[0] is d2[0]:
                     print(s1)
                     print(s2)
-                    print(f'多倍{type_b}')
+                    print(f'主动买卖多倍{type_b}')
             else:
-                s1 = float(d2[0]['sellVol']) / float(d2[1]['sellVol'])
-                s2 = float(d2[0]['sellVol']) / float(d2[2]['sellVol'])
-                if s1 > n or s2 > n:
+                d1 = sorted(r3, key=itemgetter('sellVol'), reverse=True)
+                s1 = d2[0]['sellVol'] / d2[1]['sellVol']
+                s2 = d2[0]['sellVol'] / d2[2]['sellVol']
+                if s1 > n or s2 > n and d1[0] is d2[0]:
                     print(s1)
                     print(s2)
-                    print(f'多倍{type_s}')
+                    print(f'主动买卖多倍{type_s}')
             k['s'] = max(s1, s2)
 
         h.append(dict(k))

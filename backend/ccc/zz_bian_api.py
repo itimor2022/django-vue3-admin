@@ -78,7 +78,7 @@ def main():
                 if s1 > n or s2 > n and d1[0] is d2[0]:
                     print(s1)
                     print(s2)
-                    print(f'多倍{type_b}')
+                    print(f'主动买卖多倍{type_b}')
             else:
                 d1 = sorted(r3, key=itemgetter('sellVol'), reverse=True)
                 s1 = d2[0]['sellVol'] / d2[1]['sellVol']
@@ -86,7 +86,7 @@ def main():
                 if s1 > n or s2 > n and d1[0] is d2[0]:
                     print(s1)
                     print(s2)
-                    print(f'多倍{type_s}')
+                    print(f'主动买卖多倍{type_s}')
             k['s'] = max(s1, s2)
 
         h.append(dict(k))
