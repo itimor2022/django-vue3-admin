@@ -7,8 +7,9 @@ period = '5m'
 typ = 'USDT'
 
 t = int(time.time())
-print(t)
-
+timeArray = time.localtime(t)
+otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+print(otherStyleTime)
 
 def get_pairs():
     exclude_pair_list = ['USDCUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'PEPEUSDT', 'DOGEUSDT', 'TONUSDT', 'XRPUSDT',
