@@ -111,9 +111,10 @@ def main():
     ss = sorted(h, key=itemgetter('s'), reverse=True)
     print(ss)
 
-    print("发送消息")
-    all_msg = '\n'.join(s_list)
-    send_message('最多跌幅\n' + all_msg)
+    if len(s_list)>0:
+        print("发送消息")
+        all_msg = '\n'.join(s_list)
+        send_message(':China:最多涨幅:China:\n' + all_msg)
 
 
 if __name__ == '__main__':
