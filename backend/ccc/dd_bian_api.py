@@ -105,16 +105,15 @@ def main():
                     k['s'] = s
                     msg = f"{otherStyleTime} 主动卖出多倍 {p} {s}"
                     s_list.append(msg)
-
-            print("发送消息")
-            all_msg = '\n'.join(s_list)
-            send_message('最多跌幅\n' + all_msg)
-
         h.append(dict(k))
     print(h)
     print("***************** 主动买卖量比 *****************")
     ss = sorted(h, key=itemgetter('s'), reverse=True)
     print(ss)
+
+    print("发送消息")
+    all_msg = '\n'.join(s_list)
+    send_message('最多跌幅\n' + all_msg)
 
 
 if __name__ == '__main__':
