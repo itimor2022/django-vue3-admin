@@ -23,7 +23,7 @@ def get_pairs():
         if p not in exclude_pair_list:
             c_list.append(p)
     print(c_list)
-    return c_list[:10]
+    return c_list[:12]
 
 
 def main():
