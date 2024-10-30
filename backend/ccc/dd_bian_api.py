@@ -14,8 +14,9 @@ print(otherStyleTime)
 
 def send_message(msg):
     chat_id = "-4591709428"
-    token = "7114302389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
-    url = f"https://api.telegram.org/bot{token}/sendMessage?chat_id={chat_id}&text={msg}"
+    token1 = "7114302"
+    token2 = "389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
+    url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}"
     r = requests.get(url)
     print(r)
 
@@ -23,7 +24,8 @@ def send_message(msg):
 def get_pairs():
     exclude_pair_list = ['USDCUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'PEPEUSDT', 'DOGEUSDT', 'TONUSDT', 'XRPUSDT',
                          'BCHUSDT', 'LTCUSDT', 'SHIBUSDT', 'TONUSDT']
-    url = f"https://www.okx.com/priapi/v5/rubik/web/public/up-down-rank?countryFilter=1&rank=1&zone=utc8&period={period}&type={typ}&t={t}"
+    url = f"https://www.okx.com/priapi/v5/rubik/web/public/up-down-rank?countryFilter=1&rank=1&zone=utc8&{period}&type={typ}&t={t}"
+    print(url)
     r = requests.get(url)
     c = r.json()['data']['data']
     c_list = []

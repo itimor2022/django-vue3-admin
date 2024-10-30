@@ -24,7 +24,7 @@ def send_message(msg):
 def get_pairs():
     exclude_pair_list = ['USDCUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'PEPEUSDT', 'DOGEUSDT', 'TONUSDT', 'XRPUSDT',
                          'BCHUSDT', 'LTCUSDT', 'SHIBUSDT', 'TONUSDT']
-    url = f"https://www.okx.com/priapi/v5/rubik/web/public/up-down-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type={typ}&t={t}"
+    url = f"https://www.okx.com/priapi/v5/rubik/web/public/turn-over-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type={typ}&t={t}"
     r = requests.get(url)
     c = r.json()['data']['data']
     c_list = []
@@ -115,7 +115,7 @@ def main():
     if len(s_list) > 0:
         print("发送消息")
         all_msg = '\n'.join(s_list)
-        send_message('-*-最多涨幅-*-\n' + all_msg)
+        send_message('-*-最多成交额-*-\n' + all_msg)
 
 
 if __name__ == '__main__':
