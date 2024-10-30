@@ -42,6 +42,7 @@ def main():
     type_s = '做空'
 
     h = list()
+    s_list = list()
     for index, pair in enumerate(pair_list):
         k = dict()
         m = 2.5
@@ -87,7 +88,11 @@ def main():
                 if s1 > n or s2 > n and d1[0] is d2[0]:
                     print(s1)
                     print(s2)
-                    print(f'主动买卖多倍{type_b}')
+                    print(f'主动买入多倍{type_b}')
+                    s = max(s1, s2)
+                    k['s'] = s
+                    msg = f"{otherStyleTime} 主动买入多倍 {p} {s}"
+                    s_list.append(msg)
             else:
                 d1 = sorted(r3, key=itemgetter('sellVol'), reverse=True)
                 s1 = d2[0]['sellVol'] / d2[1]['sellVol']
@@ -95,12 +100,15 @@ def main():
                 if s1 > n or s2 > n and d1[0] is d2[0]:
                     print(s1)
                     print(s2)
-                    print(f'主动买卖多倍{type_s}')
-            s = max(s1, s2)
-            k['s'] = s
+                    print(f'主动卖出多倍{type_s}')
+                    s = max(s1, s2)
+                    k['s'] = s
+                    msg = f"{otherStyleTime} 主动卖出多倍 {p} {s}"
+                    s_list.append(msg)
+
             print("发送消息")
-            msg = f"{otherStyleTime} {p} {s}"
-            send_message(msg)
+            all_msg = '\n'.join(s_list)
+            send_message('最多跌幅\n' + all_msg)
 
         h.append(dict(k))
     print(h)

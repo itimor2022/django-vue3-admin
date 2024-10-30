@@ -21,5 +21,5 @@ def send_message(msg):
 
 
 if __name__ == '__main__':
-    msg = "你好"
+    msg = "你好\n" + "到"
     send_message(msg)
