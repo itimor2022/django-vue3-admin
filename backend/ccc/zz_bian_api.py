@@ -5,7 +5,7 @@ import time
 
 period = '5m'
 typ = 'USDT'
-
+print("*"*140)
 t = int(time.time())
 timeArray = time.localtime(t)
 otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
