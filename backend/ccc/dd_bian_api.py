@@ -3,6 +3,8 @@ from operator import itemgetter
 import requests
 import time
 
+from backend.ccc.send_tg import chat_id
+
 period = '5m'
 typ = 'USDT'
 print("*" * 100)
@@ -12,8 +14,7 @@ otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
 print(otherStyleTime)
 
 
-def send_message(msg):
-    chat_id = "-4591709428"
+def send_message(msg, chat_id="-4591709428"):
     token1 = "7114302"
     token2 = "389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
     url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}"
@@ -94,7 +95,10 @@ def main():
                     s = max(s1, s2)
                     k['s'] = s
                     msg = f"主动买入多倍 {p} {s}"
-                    s_list.append(msg)
+                    if s > 7:
+                        send_message('-*-最多跌幅-*-\n' + msg, chat_id="-1002086380388")
+                    else:
+                        s_list.append(msg)
             else:
                 d1 = sorted(r3, key=itemgetter('sellVol'), reverse=True)
                 s1 = d2[0]['sellVol'] / d2[1]['sellVol']
@@ -106,14 +110,17 @@ def main():
                     s = max(s1, s2)
                     k['s'] = s
                     msg = f"主动卖出多倍 {p} {s}"
-                    s_list.append(msg)
+                    if s > 7:
+                        send_message('-*-最多跌幅-*-\n' + msg, chat_id="-1002086380388")
+                    else:
+                        s_list.append(msg)
         h.append(dict(k))
     print(h)
     print("***************** 主动买卖量比 *****************")
     ss = sorted(h, key=itemgetter('s'), reverse=True)
     print(ss)
 
-    if len(s_list)>0:
+    if len(s_list) > 0:
         print("发送消息")
         all_msg = '\n'.join(s_list)
         send_message('-*-最多跌幅-*-\n' + all_msg)
