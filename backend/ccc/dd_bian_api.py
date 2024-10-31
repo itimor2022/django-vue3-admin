@@ -93,7 +93,7 @@ def main():
                     print(f'主动买入多倍{type_b}')
                     s = max(s1, s2)
                     k['s'] = s
-                    msg = f"{otherStyleTime} 主动买入多倍 {p} {s}"
+                    msg = f"主动买入多倍 {p} {s}"
                     s_list.append(msg)
             else:
                 d1 = sorted(r3, key=itemgetter('sellVol'), reverse=True)
@@ -105,7 +105,7 @@ def main():
                     print(f'主动卖出多倍{type_s}')
                     s = max(s1, s2)
                     k['s'] = s
-                    msg = f"{otherStyleTime} 主动卖出多倍 {p} {s}"
+                    msg = f"主动卖出多倍 {p} {s}"
                     s_list.append(msg)
         h.append(dict(k))
     print(h)
