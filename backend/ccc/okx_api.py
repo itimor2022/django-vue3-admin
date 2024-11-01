@@ -41,6 +41,7 @@ def stamp2time(timeStamp):  # 时间戳转日期函数
     dt = time.strftime("%Y-%m-%d %H:%M:%S", time_local)
     return dt
 
+
 def send_message(msg, chat_id="-4591709428"):
     token1 = "7114302"
     token2 = "389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
@@ -158,9 +159,10 @@ def get_pairs():
     r = requests.get(url)
     c = r.json()['data']['data']
     c_list = []
-    for p in c:
+    for i in c:
+        p = i['instId']
         if p not in exclude_pair_list:
-            c_list.append(p['instId'])
+            c_list.append(p)
     return c_list[:50]
 
 
@@ -184,6 +186,7 @@ def main():
         all_msg = '\n'.join(s_list)
         print(all_msg)
         send_message(f'-*-3分钟成交量{n}倍-*-\n' + all_msg)
+
 
 if __name__ == '__main__':
     api_key = "ff633c9f-eeb1-4073-bfbc-de5a93af409c"
