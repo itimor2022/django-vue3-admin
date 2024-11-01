@@ -179,9 +179,11 @@ def main():
         if m > n:
             s = f"{pair} {m}"
             s_list.append(s)
-    all_msg = '\n'.join(s_list)
-    print(all_msg)
-    send_message(f'-*-3分钟成交量{n}倍-*-\n' + all_msg)
+    if len(s_list) > 0:
+        print("发送消息")
+        all_msg = '\n'.join(s_list)
+        print(all_msg)
+        send_message(f'-*-3分钟成交量{n}倍-*-\n' + all_msg)
 
 if __name__ == '__main__':
     api_key = "ff633c9f-eeb1-4073-bfbc-de5a93af409c"
