@@ -173,7 +173,7 @@ def get_pairs(typ):
 def main():
     n = 5
     # pair_list = ['CATI-USDT']
-    pair_list = get_pairs()
+    pair_list = get_pairs(typ)
     s_list = list()
     for index, pair in enumerate(pair_list):
         print(index)
