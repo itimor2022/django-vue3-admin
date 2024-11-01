@@ -163,7 +163,7 @@ def get_pairs():
         p = i['instId']
         if p not in exclude_pair_list:
             c_list.append(p)
-    return c_list[:50]
+    return c_list[:100]
 
 
 def main():
