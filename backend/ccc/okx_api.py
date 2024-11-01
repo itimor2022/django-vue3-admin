@@ -176,9 +176,9 @@ def get_btc():
     n = abs(m)
     if n > 0.09:
         if m > 0:
-            send_message(f'-*-3分钟btc涨跌幅-*- +{m}%')
+            send_message(f'-*-3分钟btc涨跌幅-*- | +{n}%')
         else:
-            send_message(f'-*-3分钟btc涨跌幅-*- -{m}%')
+            send_message(f'-*-3分钟btc涨跌幅-*- | -{n}%')
 
 def main():
     n = 5
