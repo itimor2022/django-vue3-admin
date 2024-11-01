@@ -3,6 +3,8 @@ from operator import itemgetter
 import requests
 import time
 
+from backend.ccc.send_tg import chat_id
+
 period = '5m'
 typ = 'USDT'
 print("*" * 100)
@@ -23,7 +25,8 @@ def send_message(msg, chat_id="-4591709428"):
 def get_pairs():
     exclude_pair_list = ['USDCUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'PEPEUSDT', 'DOGEUSDT', 'TONUSDT', 'XRPUSDT',
                          'BCHUSDT', 'LTCUSDT', 'SHIBUSDT', 'TONUSDT']
-    url = f"https://www.okx.com/priapi/v5/rubik/web/public/up-down-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type={typ}&t={t}"
+    url = f"https://www.okx.com/priapi/v5/rubik/web/public/up-down-rank?countryFilter=1&rank=0&zone=utc8&{period}&type={typ}&t={t}"
+    print(url)
     r = requests.get(url)
     c = r.json()['data']['data']
     c_list = []
@@ -120,7 +123,7 @@ def main():
     if len(s_list) > 0:
         print("发送消息")
         all_msg = '\n'.join(s_list)
-        send_message('-*-最多涨幅-*-\n' + all_msg)
+        send_message('-*-最多跌幅-*-\n' + all_msg)
 
 
 if __name__ == '__main__':
