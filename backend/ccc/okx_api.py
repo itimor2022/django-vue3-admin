@@ -10,10 +10,11 @@ import time
 import datetime
 import hmac
 import base64
+from sys import argv
 
 '''para
 '''
-# http
+typ = argv[1]
 t = int(time.time())
 API_URL = 'https://www.okx.com'
 GET = "GET"
@@ -124,8 +125,6 @@ class Client(object):
             response = requests.get(url, headers=header)
         elif method == POST:
             response = requests.post(url, data=body, headers=header)
-        if not str(response.status_code).startswith('2'):
-            raise exceptions.OkexAPIException(response)
 
         return response.json()
 
@@ -152,10 +151,15 @@ class MarketAPI(Client):
         return self.request_with_para(GET, url, para)
 
 
-def get_pairs():
+def get_pairs(typ):
     period = '1H'
     exclude_pair_list = ['USDC-USDT', 'BTC-USDT', 'ETH-USDT', 'XRP-USDT', 'BCH-USDT', 'LTC-USDT', 'TON-USDT']
-    url = f"https://www.okx.com/priapi/v5/rubik/web/public/turn-over-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type=USDT&t={t}"
+    if typ == 'hot':
+        # 热门榜
+        url = f"https://www.okx.com/priapi/v5/rubik/web/public/hot-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type=USDT&t={t}"
+    else:
+        #成交额
+        url = f"https://www.okx.com/priapi/v5/rubik/web/public/turn-over-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type=USDT&t={t}"
     r = requests.get(url)
     c = r.json()['data']['data']
     c_list = []
