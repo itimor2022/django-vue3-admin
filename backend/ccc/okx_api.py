@@ -174,7 +174,7 @@ def get_btc():
     result = marketAPI.get_history_candlesticks('BTC-USDT')['data']
     print(result)
     m = (float(result[0][4]) / float(result[0][1]) - 1) * 100
-    n = abs(m)
+    n = round(abs(m), 2)
     if n > 0.09:
         if m > 0:
             send_message(f'-*-3分钟btc涨跌幅-*- | +{n}%')
@@ -191,7 +191,7 @@ def main():
         print(index)
         print(pair)
         result = marketAPI.get_history_candlesticks(pair)['data']
-        m = float(result[0][5]) / float(result[1][5])
+        m = round(float(result[0][5]) / float(result[1][5]), 2)
         if m > n:
             print(m)
             print(result)
