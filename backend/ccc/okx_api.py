@@ -191,7 +191,7 @@ def main():
         print(index)
         print(pair)
         result = marketAPI.get_history_candlesticks(pair)['data']
-        m = float(result[1][5]) / float(result[0][5])
+        m = float(result[0][5]) / float(result[1][5])
         if m > n:
             print(m)
             print(result)
