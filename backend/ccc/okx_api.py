@@ -43,10 +43,18 @@ def stamp2time(timeStamp):  # 时间戳转日期函数
     return dt
 
 
+emoji_dict = {
+        "laugh": "%f0%9f%98%82",
+        "angry": "%f0%9f%98%a1",
+        "evil": "%f0%9f%98%82",
+        "sex_laugh": "%f0%9f%98%88",
+        "han": "%f0%9f%98%93",
+        "kiss": "%f0%9f%98%98",
+    }
 def send_message(msg, chat_id="-4591709428"):
     token1 = "7114302"
     token2 = "389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
-    url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}"
+    url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}&parse_modwarninge=Markdown"
     r = requests.get(url)
     print(r)
 
@@ -177,9 +185,9 @@ def get_btc():
     n = round(abs(m), 2)
     if n > 0.09:
         if m > 0:
-            send_message(f'-*-3分钟btc涨跌幅-*- | +{n}%')
+            send_message(f'-*-3分钟btc涨跌幅-*- {emoji_dict["laugh"]} +{n}%')
         else:
-            send_message(f'-*-3分钟btc涨跌幅-*- | -{n}%')
+            send_message(f'-*-3分钟btc涨跌幅-*- {emoji_dict["evil"]} -{n}%')
 
 
 def main():

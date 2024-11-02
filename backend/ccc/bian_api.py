@@ -12,10 +12,10 @@ otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
 print(otherStyleTime)
 
 
-def send_message(msg, chat_id="-4591709428"):
+def send_message(msg, emoji, chat_id="-4591709428"):
     token1 = "7114302"
     token2 = "389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
-    url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}"
+    url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={emoji}{msg}&parse_modwarninge=Markdown"
     r = requests.get(url)
     print(r)
 
@@ -62,4 +62,14 @@ if __name__ == '__main__':
     futures_client = UMFutures(key='5gYKudrzlzetWpR3i6dcbXqBN74dZ6SQvOJjWDCKrp3CGsSesmL4OgBPqPyg2754',
                                secret='MbvXMsuAxsjIQ9ZJLGK2RRVtfLcuwXuezatK6sROthX9lbGyiv2AdenE6oqOsdOc')
     # get_pairs()
-    main()
+    emoji_dict = {
+        "laugh": "%f0%9f%98%82",
+        "angry": "%f0%9f%98%a1",
+        "evil": "%f0%9f%98%82",
+        "sex_laugh": "%f0%9f%98%88",
+        "han": "%f0%9f%98%93",
+        "kiss": "%f0%9f%98%98",
+    }
+    msg = "涨了"
+    send_message(msg, emoji_dict['laugh'])
+    # main()
