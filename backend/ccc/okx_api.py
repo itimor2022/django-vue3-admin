@@ -197,7 +197,7 @@ def main():
             print(result)
             s = f"{pair} {m}"
             s_list.append(s)
-            msg = f'{result[0][0]} {result[0][1]} {result[0][2]} {result[0][3]} {result[0][4]} {result[0][5]}'
+            msg = f'{pair} {result[0][0]} {result[0][1]} {result[0][2]} {result[0][3]} {result[0][4]} {result[0][5]}'
             send_message(f'-*-3分钟成交量{n}倍-*-\n' + msg, chat_id="-1002086380388")
     if len(s_list) > 0:
         print("发送消息")
