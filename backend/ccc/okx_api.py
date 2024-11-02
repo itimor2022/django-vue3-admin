@@ -158,7 +158,7 @@ def get_pairs(typ):
         # 热门榜
         url = f"https://www.okx.com/priapi/v5/rubik/web/public/hot-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type=USDT&t={t}"
     else:
-        #成交额
+        # 成交额
         url = f"https://www.okx.com/priapi/v5/rubik/web/public/turn-over-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type=USDT&t={t}"
     r = requests.get(url)
     c = r.json()['data']['data']
@@ -168,6 +168,7 @@ def get_pairs(typ):
         if p not in exclude_pair_list:
             c_list.append(p)
     return c_list[:100]
+
 
 def get_btc():
     result = marketAPI.get_history_candlesticks('BTC-USDT')['data']
@@ -179,6 +180,7 @@ def get_btc():
             send_message(f'-*-3分钟btc涨跌幅-*- | +{n}%')
         else:
             send_message(f'-*-3分钟btc涨跌幅-*- | -{n}%')
+
 
 def main():
     n = 5
@@ -195,6 +197,7 @@ def main():
             print(result)
             s = f"{pair} {m}"
             s_list.append(s)
+            send_message(f'-*-3分钟成交量{n}倍-*-\n' + result, chat_id="-1002086380388")
     if len(s_list) > 0:
         print("发送消息")
         all_msg = '\n'.join(s_list)
