@@ -163,7 +163,7 @@ def get_btc():
     print(result)
     return_0 = (float(result[0][4]) / float(result[0][1]) - 1) * 100
     return_1 = (float(result[1][4]) / float(result[2][1]) - 1) * 100
-    return_x = abs(return_0) / abs(return_1)
+    return_x = round(abs(return_0) / abs(return_1), 2)
     print(return_0)
     print(return_1)
     print(return_x)
