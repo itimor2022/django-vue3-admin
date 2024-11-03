@@ -44,13 +44,15 @@ def stamp2time(timeStamp):  # 时间戳转日期函数
 
 
 emoji_dict = {
-        "laugh": "%f0%9f%98%82",
-        "angry": "%f0%9f%98%a1",
-        "evil": "%f0%9f%98%82",
-        "sex_laugh": "%f0%9f%98%88",
-        "han": "%f0%9f%98%93",
-        "kiss": "%f0%9f%98%98",
-    }
+    "laugh": "%f0%9f%98%82",
+    "angry": "%f0%9f%98%a1",
+    "evil": "%f0%9f%98%82",
+    "kiss_laugh": "%f0%9f%98%88",
+    "han": "%f0%9f%98%93",
+    "kiss": "%f0%9f%98%98",
+}
+
+
 def send_message(msg, chat_id="-4591709428"):
     token1 = "7114302"
     token2 = "389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
@@ -179,7 +181,7 @@ def get_pairs(typ):
 
 
 def get_btc():
-    result = marketAPI.get_history_candlesticks('BTC-USDT',bar='5m')['data']
+    result = marketAPI.get_history_candlesticks('BTC-USDT', bar='5m')['data']
     print(result)
     return_0 = (float(result[0][4]) / float(result[0][1]) - 1) * 100
     return_1 = (float(result[1][4]) / float(result[2][1]) - 1) * 100
@@ -199,6 +201,13 @@ def get_btc():
             send_message(f'{emoji_dict["kiss"]} {title}此时涨幅超5倍 +{return_x}', chat_id="-1002086380388")
         else:
             send_message(f'{emoji_dict["evil"]} {title}此时跌幅超5倍 -{return_x}', chat_id="-1002086380388")
+
+    # 对比成交量
+    volume_0 = round(float(result[0][5]) / float(result[1][5]), 2)
+    volume_1 = round(float(result[0][5]) / float(result[2][5]), 2)
+    volume_x = max(volume_0, volume_1)
+    if volume_x > 7:
+        send_message(f'{emoji_dict["kiss_laugh"]} {title}此时成交量超7倍 +{volume_x}', chat_id="-1002086380388")
 
 
 def main():
