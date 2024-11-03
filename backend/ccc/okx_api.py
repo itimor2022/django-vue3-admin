@@ -161,6 +161,7 @@ class MarketAPI(Client):
 def get_btc():
     result = marketAPI.get_history_candlesticks('BTC-USDT', bar='5m')['data']
     print(result)
+    print("涨跌幅")
     return_0 = (float(result[0][4]) / float(result[0][1]) - 1) * 100
     return_1 = (float(result[1][4]) / float(result[2][1]) - 1) * 100
     return_x = round(abs(return_0) / abs(return_1), 2)
@@ -181,9 +182,13 @@ def get_btc():
             send_message(f'{emoji_dict["evil"]} {title}此时跌幅超5倍 -{return_x} 涨幅 {return_0}', chat_id="-1002086380388")
 
     # 对比成交量
+    print("成交量")
     volume_0 = round(float(result[0][5]) / float(result[1][5]), 2)
     volume_1 = round(float(result[0][5]) / float(result[2][5]), 2)
     volume_x = max(volume_0, volume_1)
+    print(volume_0)
+    print(volume_1)
+    print(volume_x)
     if volume_x > 4.8:
         send_message(f'{emoji_dict["kiss_laugh"]} {title}此时成交量超7倍 +{volume_x}', chat_id="-1002086380388")
 
