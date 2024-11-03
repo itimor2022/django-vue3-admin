@@ -191,14 +191,14 @@ def get_btc():
     title = '-*- 5分钟btc -*-\n'
     if n > 0.09:
         if return_0 > 0:
-            send_message(f'{title}单线涨幅超一个点 {emoji_dict["laugh"]} +{n}')
+            send_message(f'{emoji_dict["laugh"]} {title}单线涨幅超一个点 +{n}')
         else:
-            send_message(f'{title}单线跌幅超一个点 {emoji_dict["evil"]} -{n}')
+            send_message(f'{emoji_dict["angry"]} {title}单线跌幅超一个点 -{n}')
     if return_x > 4.5:
         if return_0 > 0:
-            send_message(f'{title}此时涨幅超5倍 {emoji_dict["sex_laugh"]} +{return_x}', chat_id="-1002086380388")
+            send_message(f'{emoji_dict["kiss"]} {title}此时涨幅超5倍 +{return_x}', chat_id="-1002086380388")
         else:
-            send_message(f'{title}此时涨幅超5倍 {emoji_dict["han"]} -{return_x}', chat_id="-1002086380388")
+            send_message(f'{emoji_dict["evil"]} {title}此时跌幅超5倍 -{return_x}', chat_id="-1002086380388")
 
 
 def main():
