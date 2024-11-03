@@ -181,13 +181,23 @@ def get_pairs(typ):
 def get_btc():
     result = marketAPI.get_history_candlesticks('BTC-USDT')['data']
     print(result)
-    m = (float(result[0][4]) / float(result[0][1]) - 1) * 100
-    n = round(abs(m), 2)
+    return_0 = (float(result[0][4]) / float(result[0][1]) - 1) * 100
+    return_1 = (float(result[1][4]) / float(result[2][1]) - 1) * 100
+    return_x = abs(return_0) / abs(return_1)
+    print(return_0)
+    print(return_1)
+    print(return_x)
+    n = round(abs(return_0), 2)
     if n > 0.09:
-        if m > 0:
+        if return_0 > 0:
             send_message(f'-*-3分钟btc涨跌幅-*- {emoji_dict["laugh"]} +{n}%')
         else:
             send_message(f'-*-3分钟btc涨跌幅-*- {emoji_dict["evil"]} -{n}%')
+    if return_x > 4.5:
+        if return_0 > 0:
+            send_message(f'-*-3分钟btc涨跌幅-*- {emoji_dict["sex_laugh"]} +{n}%', chat_id="-1002086380388")
+        else:
+            send_message(f'-*-3分钟btc涨跌幅-*- {emoji_dict["han"]} -{n}%', chat_id="-1002086380388")
 
 
 def main():
@@ -221,4 +231,4 @@ if __name__ == '__main__':
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
     get_btc()
-    main()
+    # main()
