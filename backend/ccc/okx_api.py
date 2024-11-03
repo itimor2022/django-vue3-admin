@@ -153,7 +153,7 @@ class MarketAPI(Client):
     def __init__(self, api_key, api_secret_key, passphrase, use_server_time=False, flag='1'):
         Client.__init__(self, api_key, api_secret_key, passphrase, use_server_time, flag)
 
-    def get_history_candlesticks(self, instId, after=None, before=None, bar='5m', limit=None):
+    def get_history_candlesticks(self, instId, after=None, before=None, bar='3m', limit=None):
         url = '/api/v5/market/history-candles'
         para = {'instId': instId, 'after': after, 'before': before, 'bar': bar, 'limit': limit}
         return self.request_with_para(GET, url, para)
@@ -179,7 +179,7 @@ def get_pairs(typ):
 
 
 def get_btc():
-    result = marketAPI.get_history_candlesticks('BTC-USDT')['data']
+    result = marketAPI.get_history_candlesticks('BTC-USDT',bar='5m')['data']
     print(result)
     return_0 = (float(result[0][4]) / float(result[0][1]) - 1) * 100
     return_1 = (float(result[1][4]) / float(result[2][1]) - 1) * 100
