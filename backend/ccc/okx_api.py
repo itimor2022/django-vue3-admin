@@ -10,11 +10,10 @@ import time
 import datetime
 import hmac
 import base64
-from sys import argv
+import pandas as pd
 
 '''para
 '''
-typ = argv[1]
 t = int(time.time())
 API_URL = 'https://www.okx.com'
 GET = "GET"
@@ -155,30 +154,10 @@ class MarketAPI(Client):
     def __init__(self, api_key, api_secret_key, passphrase, use_server_time=False, flag='1'):
         Client.__init__(self, api_key, api_secret_key, passphrase, use_server_time, flag)
 
-    def get_history_candlesticks(self, instId, after=None, before=None, bar='3m', limit=None):
+    def get_history_candlesticks(self, instId, after=None, before=None, bar='5m', limit=None):
         url = '/api/v5/market/history-candles'
         para = {'instId': instId, 'after': after, 'before': before, 'bar': bar, 'limit': limit}
         return self.request_with_para(GET, url, para)
-
-
-def get_pairs(typ):
-    period = '1H'
-    exclude_pair_list = ['USDC-USDT', 'BTC-USDT', 'ETH-USDT', 'XRP-USDT', 'BCH-USDT', 'LTC-USDT', 'TON-USDT']
-    if typ == 'hot':
-        # 热门榜
-        url = f"https://www.okx.com/priapi/v5/rubik/web/public/hot-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type=USDT&t={t}"
-    else:
-        # 成交额
-        url = f"https://www.okx.com/priapi/v5/rubik/web/public/turn-over-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type=USDT&t={t}"
-    r = requests.get(url)
-    c = r.json()['data']['data']
-    c_list = []
-    for i in c:
-        p = i['instId']
-        if p not in exclude_pair_list:
-            c_list.append(p)
-    return c_list[:100]
-
 
 def get_btc():
     result = marketAPI.get_history_candlesticks('BTC-USDT', bar='5m')['data']
@@ -193,14 +172,14 @@ def get_btc():
     title = '-*- 5分钟btc -*-\n'
     if n > 0.09:
         if return_0 > 0:
-            send_message(f'{emoji_dict["laugh"]} {title}单线涨幅超一个点 +{n}')
+            send_message(f'{emoji_dict["laugh"]} {title}单线涨幅超一个点 +{n}', chat_id="-1002086380388")
         else:
-            send_message(f'{emoji_dict["angry"]} {title}单线跌幅超一个点 -{n}')
+            send_message(f'{emoji_dict["angry"]} {title}单线跌幅超一个点 -{n}', chat_id="-1002086380388")
     if return_x > 4.5:
         if return_0 > 0:
-            send_message(f'{emoji_dict["kiss"]} {title}此时涨幅超5倍 +{return_x}', chat_id="-1002086380388")
+            send_message(f'{emoji_dict["kiss"]} {title}此时涨幅超5倍 +{return_x} 涨幅 {return_0}', chat_id="-1002086380388")
         else:
-            send_message(f'{emoji_dict["evil"]} {title}此时跌幅超5倍 -{return_x}', chat_id="-1002086380388")
+            send_message(f'{emoji_dict["evil"]} {title}此时跌幅超5倍 -{return_x} 涨幅 {return_0}', chat_id="-1002086380388")
 
     # 对比成交量
     volume_0 = round(float(result[0][5]) / float(result[1][5]), 2)
@@ -210,28 +189,17 @@ def get_btc():
         send_message(f'{emoji_dict["kiss_laugh"]} {title}此时成交量超7倍 +{volume_x}', chat_id="-1002086380388")
 
 
-def main():
-    n = 5
+def get_zhang():
+    period = '5m'
+    # 热门榜
+    url = f"https://www.okx.com/priapi/v5/rubik/web/public/hot-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type=USDT&t={t}"
+    # 成交额
+    # url = f"https://www.okx.com/priapi/v5/rubik/web/public/turn-over-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type=USDT&t={t}"
     # pair_list = ['CATI-USDT']
-    pair_list = get_pairs(typ)
-    s_list = list()
-    for index, pair in enumerate(pair_list):
-        print(index)
-        print(pair)
-        result = marketAPI.get_history_candlesticks(pair)['data']
-        m = round(float(result[0][5]) / float(result[1][5]), 2)
-        if m > n:
-            print(m)
-            print(result)
-            s = f"{pair} {m}"
-            s_list.append(s)
-            msg = f'{pair} {result[0][0]} {result[0][1]} {result[0][2]} {result[0][3]} {result[0][4]} {result[0][5]}'
-            send_message(f'-*-3分钟成交量{n}倍-*-\n' + msg, chat_id="-1002086380388")
-    if len(s_list) > 0:
-        print("发送消息")
-        all_msg = '\n'.join(s_list)
-        print(all_msg)
-        send_message(f'-*-3分钟成交量{n}倍-*-\n' + all_msg)
+    r = requests.get(url)
+    c = r.json()['data']['data']
+    df = pd.DataFrame(c)
+    print(df)
 
 
 if __name__ == '__main__':
@@ -241,4 +209,4 @@ if __name__ == '__main__':
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
     get_btc()
-    # main()
+    # get_zhang()
