@@ -174,7 +174,7 @@ def get_btc():
             send_message(f'{emoji_dict["laugh"]} {title}单线涨幅超一个点 +{n}', chat_id="-1002086380388")
         else:
             send_message(f'{emoji_dict["angry"]} {title}单线跌幅超一个点 -{n}', chat_id="-1002086380388")
-    if return_x > 4.5:
+    if return_x > 4.8:
         if return_0 > 0:
             send_message(f'{emoji_dict["kiss"]} {title}此时涨幅超5倍 +{return_x} 涨幅 {return_0}', chat_id="-1002086380388")
         else:
@@ -184,7 +184,7 @@ def get_btc():
     volume_0 = round(float(result[0][5]) / float(result[1][5]), 2)
     volume_1 = round(float(result[0][5]) / float(result[2][5]), 2)
     volume_x = max(volume_0, volume_1)
-    if volume_x > 6.5:
+    if volume_x > 4.8:
         send_message(f'{emoji_dict["kiss_laugh"]} {title}此时成交量超7倍 +{volume_x}', chat_id="-1002086380388")
 
 
