@@ -184,7 +184,7 @@ def get_btc():
     volume_0 = round(float(result[0][5]) / float(result[1][5]), 2)
     volume_1 = round(float(result[0][5]) / float(result[2][5]), 2)
     volume_x = max(volume_0, volume_1)
-    if volume_x > 7:
+    if volume_x > 6.5:
         send_message(f'{emoji_dict["kiss_laugh"]} {title}此时成交量超7倍 +{volume_x}', chat_id="-1002086380388")
 
 
