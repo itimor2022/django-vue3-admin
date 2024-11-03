@@ -10,7 +10,6 @@ import time
 import datetime
 import hmac
 import base64
-import pandas as pd
 
 '''para
 '''
@@ -198,8 +197,7 @@ def get_zhang():
     # pair_list = ['CATI-USDT']
     r = requests.get(url)
     c = r.json()['data']['data']
-    df = pd.DataFrame(c)
-    print(df)
+    print(c)
 
 
 if __name__ == '__main__':
