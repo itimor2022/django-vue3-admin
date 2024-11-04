@@ -159,9 +159,9 @@ def get_btc():
     n = round(abs(return_0), 2)
     if n > 0.11:
         if return_0 > 0:
-            msg = f'🈯 {title}<strike>单线涨幅超一个点</strike> <i>涨跌幅:{return_now}</i> 当前价:{close}'
+            msg = f'🈯 {title}<strike>涨幅超一个点</strike> <i>涨跌幅:{return_now}</i> 当前价:{close}'
         else:
-            msg = f'🛑 {title}<strike>单线跌幅超一个点</strike> <i>涨跌幅:{return_now}</i> 当前价:{close}'
+            msg = f'🛑 {title}<strike>跌幅超一个点</strike> <i>涨跌幅:{return_now}</i> 当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
     if return_x > 4.86:
@@ -181,9 +181,9 @@ def get_btc():
     print(volume_x)
     if volume_x > 4.86:
         if return_0 > 0:
-            msg = f'💹 {title}<strike>此时成交量超7倍</strike> {volume_x} <i>涨跌幅:{return_now}</i> 当前价:{close}'
+            msg = f'💹 {title}<strike>成交量超7倍</strike> {volume_x} <i>涨跌幅:{return_now}</i> 当前价:{close}'
         else:
-            msg = f'💢 {title}<strike>此时成交量超7倍</strike> {volume_x} <i>涨跌幅:{return_now}</i> 当前价:{close}'
+            msg = f'💢 {title}<strike>成交量超7倍</strike> {volume_x} <i>涨跌幅:{return_now}</i> 当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
 
