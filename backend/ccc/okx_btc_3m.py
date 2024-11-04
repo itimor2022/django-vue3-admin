@@ -160,16 +160,16 @@ def get_btc():
     n = round(abs(return_0), 2)
     if n > 0.11:
         if return_0 > 0:
-            msg = f'🈯 {title}<strike>涨幅超一个点</strike> <i>涨跌幅</i>:{return_now} 当前价:{close}'
+            msg = f'🈯 {title}<strike>🚦涨幅超一个点</strike> <i>☘️涨跌幅</i>:{return_now} 🍄当前价:{close}'
         else:
-            msg = f'🛑 {title}<strike>跌幅超一个点</strike> <i>涨跌幅</i>:{return_now} 当前价:{close}'
+            msg = f'🛑 {title}<strike>🚦跌幅超一个点</strike> <i>☘️涨跌幅</i>:{return_now} 🍄当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
     if return_x > 4.8:
         if return_0 > 0:
-            msg = f'✳️ {title}<strike>涨幅同比超5倍</strike> <i>涨跌幅</i>:{return_now} 当前价:{close}'
+            msg = f'✳️ {title}<strike>🚦涨幅同比超5倍</strike> <i>☘️涨跌幅</i>:{return_now} 🍄当前价:{close}'
         else:
-            msg = f'🚫 {title}<strike>跌幅同比超5倍</strike> <i>涨跌幅</i>:{return_now} 当前价:{close}'
+            msg = f'🚫 {title}<strike>🚦跌幅同比超5倍</strike> <i>☘️涨跌幅</i>:{return_now} 🍄当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
     # 对比成交量
@@ -182,9 +182,9 @@ def get_btc():
     print(volume_x)
     if volume_x > 6.86:
         if return_0 > 0:
-            msg = f'💹 {title}<strike>成交量超7倍</strike> {volume_x} <i>涨跌幅</i>:{return_now} 当前价:{close}'
+            msg = f'💹 {title}<strike>🚦成交量超7倍</strike> {volume_x} <i>☘️涨跌幅</i>:{return_now} 🍄当前价:{close}'
         else:
-            msg = f'💢 {title}<strike>成交量超7倍</strike> {volume_x} <i>涨跌幅</i>:{return_now} 当前价:{close}'
+            msg = f'💢 {title}<strike>🚦成交量超7倍</strike> {volume_x} <i>☘️涨跌幅</i>:{return_now} 🍄当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
 
