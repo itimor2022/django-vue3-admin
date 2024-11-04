@@ -72,7 +72,7 @@ if __name__ == '__main__':
     }
     return_x = 0.2
     msg = '''
-    <b style="color:red">粗体</b>, <strong>粗体</strong>
+    <b>粗体</b>, <strong>粗体</strong>
 <i>斜体</i>, <em>斜体</em>
 <u>下划线</u>, <ins>下划线</ins>
 <s>删除线</s>, <strike>删除线</strike>, <del>删除线</del>
