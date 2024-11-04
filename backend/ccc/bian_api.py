@@ -15,7 +15,7 @@ print(otherStyleTime)
 def send_message(msg, chat_id="-4591709428"):
     token1 = "7114302"
     token2 = "389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
-    url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}&parse_modwarninge=Markdown"
+    url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}&parse_mode=HTML"
     r = requests.get(url)
     print(r)
 
@@ -71,9 +71,21 @@ if __name__ == '__main__':
         "kiss": "%f0%9f%98%98",
     }
     return_x = 0.2
-    msg = f'{emoji_dict["sex_laugh"]} +{return_x}'
-    msg = f"{emoji_dict['sex_laugh']} +{return_x}"
-    send_message(msg, chat_id="-1002086380388")
+    msg = '''
+    <b style="color:red">粗体</b>, <strong>粗体</strong>
+<i>斜体</i>, <em>斜体</em>
+<u>下划线</u>, <ins>下划线</ins>
+<s>删除线</s>, <strike>删除线</strike>, <del>删除线</del>
+<span class="tg-spoiler">剧透</span>, <tg-spoiler>剧透</tg-spoiler>
+<b>粗体 <i>斜体 粗体 <s>斜体 粗体 删除线 <span class="tg-spoiler">斜体 粗体 删除线 剧透</span></s> <u>下划线 斜体 粗体</u></i> 粗体</b>
+<a href="http://www.example.com/">内联 URL</a>
+<a href="tg://user?id=123456789">内联提及用户</a>
+<tg-emoji emoji-id="5368324170671202286">😃 😄❗️⚠️ ‼️☄️🔼✅💡😧🤢</tg-emoji>
+<code>内联固定宽度代码</code>
+<pre>预格式化固定宽度代码块</pre>
+<pre><code class="language-python">用Python编程语言编写的预格式化固定宽度代码块</code></pre>
+'''
+    send_message(msg, chat_id="-4591709428")
     # send_message(msg, chat_id="-1002086380388")
 
     # main()

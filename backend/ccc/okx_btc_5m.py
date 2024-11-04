@@ -11,7 +11,7 @@ import base64
 '''
 t = int(time.time())
 period = '5m'
-title = f'-*- {period} btc -*-\n'
+title = f'🏆 5️⃣分钟btc 🏆\n'
 chat_id = "-1002086380388"
 GET = "GET"
 POST = "POST"
@@ -36,22 +36,10 @@ def stamp2time(timeStamp):  # 时间戳转日期函数
     dt = time.strftime("%Y-%m-%d %H:%M:%S", time_local)
     return dt
 
-
-emoji_dict = {
-    "laugh": "%f0%9f%98%82",
-    "angry": "%f0%9f%98%a1",
-    "evil": "%f0%9f%98%88",
-    "kiss_laugh": "%f0%9f%98%8d",
-    "han": "%f0%9f%98%93",
-    "kiss": "%f0%9f%98%98",
-    "fail": "%f0%9f%98%a8",
-}
-
-
 def send_message(msg, chat_id="-4591709428"):
     token1 = "7114302"
     token2 = "389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
-    url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}&parse_modwarninge=Markdown"
+    url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}&parse_mode=HTML"
     r = requests.get(url)
     print(r)
 
@@ -171,16 +159,16 @@ def get_btc():
     n = round(abs(return_0), 2)
     if n > 0.11:
         if return_0 > 0:
-            msg = f'{emoji_dict["laugh"]} {title}单线涨幅超一个点 涨跌幅:{return_now} 当前价:{close}'
+            msg = f'🈯{title}单线涨幅超一个点 涨跌幅:{return_now} 当前价:{close}'
         else:
-            msg = f'{emoji_dict["angry"]} {title}单线跌幅超一个点 涨跌幅:{return_now} 当前价:{close}'
+            msg = f'🛑{title}单线跌幅超一个点 涨跌幅:{return_now} 当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
     if return_x > 4.86:
         if return_0 > 0:
-            msg = f'{emoji_dict["kiss"]} {title}涨幅同比超5倍 涨跌幅:{return_now} 当前价:{close}'
+            msg = f'✳️{title}涨幅同比超5倍 涨跌幅:{return_now} 当前价:{close}'
         else:
-            msg = f'{emoji_dict["fail"]} {title}跌幅同比超5倍 涨跌幅:{return_now} 当前价:{close}'
+            msg = f'🚫{title}跌幅同比超5倍 涨跌幅:{return_now} 当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
     # 对比成交量
@@ -193,9 +181,9 @@ def get_btc():
     print(volume_x)
     if volume_x > 4.86:
         if return_0 > 0:
-            msg = f'{emoji_dict["kiss_laugh"]} {title}此时成交量超7倍 +{volume_x} 涨跌幅:{return_now} 当前价:{close}'
+            msg = f'💹{title}此时成交量超7倍 +{volume_x} 涨跌幅:{return_now} 当前价:{close}'
         else:
-            msg = f'{emoji_dict["han"]} {title}此时成交量超7倍 +{volume_x} 涨跌幅:{return_now} 当前价:{close}'
+            msg = f'💢{title}此时成交量超7倍 +{volume_x} 涨跌幅:{return_now} 当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
 
