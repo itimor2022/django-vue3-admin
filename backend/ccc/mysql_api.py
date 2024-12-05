@@ -45,27 +45,33 @@ def main():
     list_id_sql = 'select id from yat_user_media where type=1 order by id desc limit 50;'
     lst = myapi.select(list_id_sql)
     id_list = [i for (i,) in lst]
-    video_id_list = random.sample(id_list, 12)
-    id_list = ', '.join(str(i) for i in video_id_list)
-    print(id_list)
+    video_id_list = random.sample(id_list, 10)
+    # 查询20662
+    s_id_sql = 'select id from yat_user_media where uid=20662;'
+    s_lst = myapi.select(s_id_sql)
+    s_id_list = [i for (i,) in s_lst]
+    s_video_id_list = random.sample(s_id_list, 1) + video_id_list
+    # 组合数据
+    z_list = ', '.join(str(i) for i in s_video_id_list)
+    print(z_list)
     # 把上面数据置顶
-    set_top_sql = 'update yat_user_media set is_topping=1 where type=1 and id in (%s);' % id_list
+    set_top_sql = 'update yat_user_media set is_topping=1 where type=1 and id in (%s);' % z_list
     myapi.update(set_top_sql)
 
 
 if __name__ == '__main__':
+    # my_info = {
+    #     "host": "16.163.200.186",
+    #     "port": 23306,
+    #     "user": "root",
+    #     "passwd": "123456",
+    #     "db": "rtx",
+    # }
     my_info = {
-        "host": "16.163.200.186",
+        "host": "127.0.0.1",
         "port": 23306,
-        "user": "root",
-        "passwd": "123456",
-        "db": "rtx",
-    }
-    my_info = {
-        "host": "16.163.200.186",
-        "port": 23306,
-        "user": "root",
-        "passwd": "123456",
+        "user": "rtx",
+        "passwd": "32w52YjCfTBBSRhS",
         "db": "rtx",
     }
     myapi = MYSQL(my_info)
