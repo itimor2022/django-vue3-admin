@@ -1,7 +1,7 @@
 # coding: utf-8
 
 import re
-
+import time
 
 def main():
     tou_zhu = input("请输入投注参数：")
@@ -35,8 +35,9 @@ def main():
 
 
 if __name__ == '__main__':
+    d = time.strftime("%Y-%m-%d", time.localtime())
     xue = input("输入靴号：")
-    with open(f"bjl_{xue}.txt", "a+") as fn:
+    with open(f"bjl_{d}_{xue}.txt", "a+") as fn:
         fn.write(f"第{xue}靴\n")
         n = 1
         while 1 > 0:
