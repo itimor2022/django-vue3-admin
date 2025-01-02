@@ -37,9 +37,10 @@ def main():
 if __name__ == '__main__':
     d = time.strftime("%Y-%m-%d", time.localtime())
     xue = input("输入靴号：")
+    n = int(input("输入局号："))
     with open(f"bjl_{d}_{xue}.txt", "a+") as fn:
-        fn.write(f"第{xue}靴\n")
-        n = 1
+        if n == 1:
+            fn.write(f"第{xue}靴\n")
         while 1 > 0:
             print(f"------开始第{n}局投注------")
             fn.write(f"开始第{n}局投注\n")

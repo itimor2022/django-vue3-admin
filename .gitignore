@@ -1,7 +1,7 @@
 /backend/venv
 /backend/.idea
 .idea
-
+*.txt
 .history/
 .vscode/
 web/package-lock.json
