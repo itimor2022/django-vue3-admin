@@ -10,8 +10,8 @@ import base64
 '''para
 '''
 t = int(time.time())
-period = '3m'
-title = f'🌝 3️⃣<b>分钟btc</b> 🌝\n'
+period = '5m'
+title = f'🏆 5️⃣<b>分钟eth</b> 🏆\n'
 chat_id = "-1002086380388"
 GET = "GET"
 POST = "POST"
@@ -36,13 +36,12 @@ def stamp2time(timeStamp):  # 时间戳转日期函数
     dt = time.strftime("%Y-%m-%d %H:%M:%S", time_local)
     return dt
 
-
-def send_message(msg, chat_id):
+def send_message(msg, chat_id="-4591709428"):
     token1 = "7114302"
     token2 = "389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
     url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}&parse_mode=HTML"
     r = requests.get(url)
-    print(r)
+    print(r.json())
 
 
 ##############################################################
@@ -145,8 +144,8 @@ class MarketAPI(Client):
         return self.request_with_para(GET, url, para)
 
 
-def get_btc():
-    result = marketAPI.get_history_candlesticks('BTC-USDT', bar=period)['data']
+def get_eth():
+    result = marketAPI.get_history_candlesticks('eth-USDT', bar=period)['data']
     print(result)
     print("涨跌幅")
     close = result[0][4]
@@ -158,18 +157,18 @@ def get_btc():
     print(return_1)
     print(return_x)
     n = round(abs(return_0), 2)
-    if n > 0.11:
+    if n > 0.5:
         if return_0 > 0:
-            msg = f'🈯 {title}<strike>🚦涨幅超一个点</strike> <i>☘️涨跌幅</i>:{return_now} 🍄当前价:{close}'
+            msg = f'🈯涨跌幅 {title}<strike>🚦涨幅超0.5点</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close}'
         else:
-            msg = f'🛑 {title}<strike>🚦跌幅超一个点</strike> <i>☘️涨跌幅</i>:{return_now} 🍄当前价:{close}'
+            msg = f'🛑涨跌幅 {title}<strike>🚦跌幅超0.5点</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
-    if return_x > 4.8:
+    if return_x > 5:
         if return_0 > 0:
-            msg = f'✳️ {title}<strike>🚦涨幅同比超5倍</strike> <i>☘️涨跌幅</i>:{return_now} 🍄当前价:{close}'
+            msg = f'✳️阳柱 {title}<strike>🚦涨幅同比超5倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close}'
         else:
-            msg = f'🚫 {title}<strike>🚦跌幅同比超5倍</strike> <i>☘️涨跌幅</i>:{return_now} 🍄当前价:{close}'
+            msg = f'🚫阴柱 {title}<strike>🚦跌幅同比超5倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
     # 对比成交量
@@ -180,11 +179,11 @@ def get_btc():
     print(volume_0)
     print(volume_1)
     print(volume_x)
-    if volume_x > 6.86:
+    if volume_x > 5:
         if return_0 > 0:
-            msg = f'💹 {title}<strike>🚦成交量超7倍</strike> {volume_x} <i>☘️涨跌幅</i>:{return_now} 🍄当前价:{close}'
+            msg = f'💹成交量 {title}<strike>🚦成交量超5倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close}'
         else:
-            msg = f'💢 {title}<strike>🚦成交量超7倍</strike> {volume_x} <i>☘️涨跌幅</i>:{return_now} 🍄当前价:{close}'
+            msg = f'💢成交量 {title}<strike>🚦成交量超5倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
 
@@ -194,5 +193,4 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    get_btc()
-    # get_zhang()
+    get_eth()
