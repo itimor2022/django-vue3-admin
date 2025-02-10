@@ -152,7 +152,7 @@ def get_btc():
     print(result)
     print("涨跌幅")
     close = result[0][4]
-    time_stamp = result[0][0] / 1000
+    time_stamp = int(result[0][0]) / 1000
     time_stamp_array = time.localtime(time_stamp)
     x = time.strftime("%Y-%m-%d %H:%M:%S", time_stamp_array)
     y = DT.utcfromtimestamp(time_stamp).strftime("%Y-%m-%d %H:%M:%S")
@@ -187,11 +187,11 @@ def get_btc():
     volume_x = max(volume_0, volume_1)
     print(volume_0)
     print(volume_1)
-    if volume_x > 5:
+    if volume_x > 2:
         if return_0 > 0:
-            msg = f'💹成交量 {title}<strike>🚦成交量超5倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+            msg = f'💹成交量 {title}<strike>🚦成交量超2倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         else:
-            msg = f'💢成交量 {title}<strike>🚦成交量超5倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+            msg = f'💢成交量 {title}<strike>🚦成交量超2倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
 
