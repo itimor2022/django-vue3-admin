@@ -145,7 +145,7 @@ class MarketAPI(Client):
 
 
 def get_coin():
-    result = marketAPI.get_history_candlesticks('eth-USDT', bar=period)['data']
+    result = marketAPI.get_history_candlesticks('ETH-USDT', bar=period)['data']
     print(result)
     print("涨跌幅")
     close = result[0][4]
