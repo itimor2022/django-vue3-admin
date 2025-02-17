@@ -13,7 +13,7 @@ from datetime import datetime as DT
 '''
 t = int(time.time())
 period = '5m'
-title = f'🏆 5️⃣<b>分钟btc</b> 🏆\n'
+title = f'btc🏆 5️⃣<b>分钟</b> 🏆\n'
 chat_id = "-1002086380388"
 GET = "GET"
 POST = "POST"
