@@ -147,7 +147,7 @@ class MarketAPI(Client):
         return self.request_with_para(GET, url, para)
 
 
-def get_btc():
+def get_coin():
     result = marketAPI.get_history_candlesticks('BTC-USDT', bar=period)['data']
     print(result)
     print("涨跌幅")
@@ -201,4 +201,4 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    get_btc()
+    get_coin()
