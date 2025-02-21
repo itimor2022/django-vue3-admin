@@ -11,9 +11,10 @@ from datetime import datetime as DT
 
 '''para
 '''
+coin = 'SOL'
 t = int(time.time())
 period = '5m'
-title = f'sol🏆 5️⃣<b>分钟</b> 🏆\n'
+title = f'{coin}🏆 5️⃣<b>分钟</b> 🏆\n'
 chat_id = "-1002086380388"
 GET = "GET"
 POST = "POST"
@@ -37,6 +38,7 @@ def stamp2time(timeStamp):  # 时间戳转日期函数
     time_local = time.localtime(int(timeStamp) / 1000)
     dt = time.strftime("%Y-%m-%d %H:%M:%S", time_local)
     return dt
+
 
 def send_message(msg, chat_id="-4591709428"):
     token1 = "7114302"
@@ -148,7 +150,7 @@ class MarketAPI(Client):
 
 
 def get_coin():
-    result = marketAPI.get_history_candlesticks('SOL-USDT', bar=period)['data']
+    result = marketAPI.get_history_candlesticks(f'{coin}-USDT', bar=period)['data']
     print(result)
     print("涨跌幅")
     close = result[0][4]
@@ -158,6 +160,13 @@ def get_coin():
     y = DT.utcfromtimestamp(time_stamp).strftime("%Y-%m-%d %H:%M:%S")
     print('本地时间：', x)
     print('UTC时间：', y)
+    #成交量
+    volume_list = [v[6] for v in result]
+    v1 = volume_list[0]
+    vmax = max(volume_list[:50])
+    if v1 == vmax:
+        msg = f'🈵🈯成交量史前巨大 {title}<strike>🚦🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        send_message(msg, chat_id=chat_id)
     return_0 = (float(result[0][4]) / float(result[0][1]) - 1) * 100
     return_1 = (float(result[1][4]) / float(result[1][1]) - 1) * 100
     return_2 = (float(result[2][4]) / float(result[2][1]) - 1) * 100
@@ -172,17 +181,17 @@ def get_coin():
     print(positive_count)
     print(negative_count)
     if negative_count >=4:
-        msg = f'📉连续阴跌 {title}<strike>🚦涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        msg = f'📉5连续阴 {title}<strike>🚦涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
     if positive_count >=4:
-        msg = f'📈连续上涨 {title}<strike>🚦涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        msg = f'📈5连阳 {title}<strike>🚦涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
     n = round(abs(return_0), 2)
     if n > 0.5:
         if return_0 > 0:
             msg = f'🈯涨跌幅 {title}<strike>🚦涨幅超大</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         else:
-            msg = f'🛑涨跌幅 {title}<strike>🚦跌幅超大</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+            msg = f'⭕️涨跌幅 {title}<strike>🚦跌幅超大</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
     if return_x > 5:
