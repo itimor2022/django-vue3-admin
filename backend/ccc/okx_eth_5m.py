@@ -7,6 +7,8 @@ import datetime
 import hmac
 import base64
 
+from datetime import datetime as DT
+
 '''para
 '''
 t = int(time.time())
@@ -35,6 +37,7 @@ def stamp2time(timeStamp):  # 时间戳转日期函数
     time_local = time.localtime(int(timeStamp) / 1000)
     dt = time.strftime("%Y-%m-%d %H:%M:%S", time_local)
     return dt
+
 
 def send_message(msg, chat_id="-4591709428"):
     token1 = "7114302"
@@ -102,6 +105,7 @@ class Client(object):
             request_path = request_path + base.parse_para_to_str(para)
         # url
         url = API_URL + request_path
+        print(url)
 
         timestamp = base.get_timestamp()
 
@@ -149,26 +153,44 @@ def get_coin():
     print(result)
     print("涨跌幅")
     close = result[0][4]
+    time_stamp = int(result[0][0]) / 1000
+    time_stamp_array = time.localtime(time_stamp)
+    x = time.strftime("%Y-%m-%d %H:%M:%S", time_stamp_array)
+    y = DT.utcfromtimestamp(time_stamp).strftime("%Y-%m-%d %H:%M:%S")
+    print('本地时间：', x)
+    print('UTC时间：', y)
     return_0 = (float(result[0][4]) / float(result[0][1]) - 1) * 100
-    return_1 = (float(result[1][4]) / float(result[2][1]) - 1) * 100
+    return_1 = (float(result[1][4]) / float(result[1][1]) - 1) * 100
+    return_2 = (float(result[2][4]) / float(result[2][1]) - 1) * 100
+    return_3 = (float(result[3][4]) / float(result[3][1]) - 1) * 100
+    return_4 = (float(result[4][4]) / float(result[4][1]) - 1) * 100
     return_x = round(abs(return_0) / abs(return_1), 2)
     return_now = round(return_0, 2)
+    return_list = [return_0, return_1, return_2, return_3, return_4]
+    positive_count = len([num for num in return_list if num > 0])
+    negative_count = len([num for num in return_list if num < 0])
+    if negative_count >=4:
+        msg = f'📉连续阴跌 {title}<strike>🚦涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        send_message(msg, chat_id=chat_id)
+    if positive_count >=4:
+        msg = f'📈连续上涨 {title}<strike>🚦涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        send_message(msg, chat_id=chat_id)
     print(return_0)
     print(return_1)
     print(return_x)
     n = round(abs(return_0), 2)
     if n > 0.5:
         if return_0 > 0:
-            msg = f'🈯涨跌幅 {title}<strike>🚦涨幅超0.5点</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close}'
+            msg = f'🈯涨跌幅 {title}<strike>🚦涨幅超大</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         else:
-            msg = f'🛑涨跌幅 {title}<strike>🚦跌幅超0.5点</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close}'
+            msg = f'⭕️涨跌幅 {title}<strike>🚦跌幅超大</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
     if return_x > 5:
         if return_0 > 0:
-            msg = f'✳️阳柱 {title}<strike>🚦涨幅同比超5倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close}'
+            msg = f'✳️阳柱 {title}<strike>🚦涨幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         else:
-            msg = f'🚫阴柱 {title}<strike>🚦跌幅同比超5倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close}'
+            msg = f'🚫阴柱 {title}<strike>🚦跌幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
     # 对比成交量
@@ -178,12 +200,11 @@ def get_coin():
     volume_x = max(volume_0, volume_1)
     print(volume_0)
     print(volume_1)
-    print(volume_x)
     if volume_x > 5:
         if return_0 > 0:
-            msg = f'💹成交量 {title}<strike>🚦成交量超5倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close}'
+            msg = f'💹成交量 {title}<strike>🚦成交量超倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         else:
-            msg = f'💢成交量 {title}<strike>🚦成交量超5倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close}'
+            msg = f'💢成交量 {title}<strike>🚦成交量超倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
 

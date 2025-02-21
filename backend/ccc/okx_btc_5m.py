@@ -38,6 +38,7 @@ def stamp2time(timeStamp):  # 时间戳转日期函数
     dt = time.strftime("%Y-%m-%d %H:%M:%S", time_local)
     return dt
 
+
 def send_message(msg, chat_id="-4591709428"):
     token1 = "7114302"
     token2 = "389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
@@ -159,9 +160,21 @@ def get_coin():
     print('本地时间：', x)
     print('UTC时间：', y)
     return_0 = (float(result[0][4]) / float(result[0][1]) - 1) * 100
-    return_1 = (float(result[1][4]) / float(result[2][1]) - 1) * 100
+    return_1 = (float(result[1][4]) / float(result[1][1]) - 1) * 100
+    return_2 = (float(result[2][4]) / float(result[2][1]) - 1) * 100
+    return_3 = (float(result[3][4]) / float(result[3][1]) - 1) * 100
+    return_4 = (float(result[4][4]) / float(result[4][1]) - 1) * 100
     return_x = round(abs(return_0) / abs(return_1), 2)
     return_now = round(return_0, 2)
+    return_list = [return_0, return_1, return_2, return_3, return_4]
+    positive_count = len([num for num in return_list if num > 0])
+    negative_count = len([num for num in return_list if num < 0])
+    if negative_count >=4:
+        msg = f'📉连续阴跌 {title}<strike>🚦涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        send_message(msg, chat_id=chat_id)
+    if positive_count >=4:
+        msg = f'📈连续上涨 {title}<strike>🚦涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        send_message(msg, chat_id=chat_id)
     print(return_0)
     print(return_1)
     print(return_x)
@@ -170,7 +183,7 @@ def get_coin():
         if return_0 > 0:
             msg = f'🈯涨跌幅 {title}<strike>🚦涨幅超大</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         else:
-            msg = f'🛑涨跌幅 {title}<strike>🚦跌幅超大</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+            msg = f'⭕️涨跌幅 {title}<strike>🚦跌幅超大</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
     if return_x > 5:
