@@ -169,15 +169,15 @@ def get_coin():
     return_list = [return_0, return_1, return_2, return_3, return_4]
     positive_count = len([num for num in return_list if num > 0])
     negative_count = len([num for num in return_list if num < 0])
+    print(return_list)
+    print(positive_count)
+    print(negative_count)
     if negative_count >=4:
         msg = f'📉连续阴跌 {title}<strike>🚦涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
     if positive_count >=4:
         msg = f'📈连续上涨 {title}<strike>🚦涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
-    print(return_0)
-    print(return_1)
-    print(return_x)
     n = round(abs(return_0), 2)
     if n > 0.5:
         if return_0 > 0:
