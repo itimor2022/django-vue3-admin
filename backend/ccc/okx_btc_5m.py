@@ -186,6 +186,21 @@ def get_coin():
     if positive_count >=4:
         msg = f'📈5连阳 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
+
+    s = 0
+    b = 0
+    for i in return_list:
+        if i <= 0:
+            s+=i
+        else:
+            b+=i
+    if abs(s) / b > 5:
+        if return_0 > 0:
+            msg = f'✳️合并阳柱 {title}<strike>🚦涨幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        else:
+            msg = f'🚫合并阴柱 {title}<strike>🚦跌幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        send_message(msg, chat_id=chat_id)
+
     n = round(abs(return_0), 2)
     if n > 0.5:
         if return_0 > 0:
