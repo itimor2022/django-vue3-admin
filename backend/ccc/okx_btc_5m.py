@@ -181,10 +181,10 @@ def get_coin():
     print(positive_count)
     print(negative_count)
     if negative_count >=4:
-        msg = f'📉5连续阴 {title}<strike>🚦涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        msg = f'📉5连续阴 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
     if positive_count >=4:
-        msg = f'📈5连阳 {title}<strike>🚦涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        msg = f'📈5连阳 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
     n = round(abs(return_0), 2)
     if n > 0.5:
