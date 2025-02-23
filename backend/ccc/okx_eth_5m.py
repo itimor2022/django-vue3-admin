@@ -11,10 +11,8 @@ from datetime import datetime as DT
 
 '''para
 '''
-coin = 'ETH'
 t = int(time.time())
 period = '5m'
-title = f'{coin}🏆 5️⃣<b>分钟</b> 🏆\n'
 chat_id = "-1002086380388"
 GET = "GET"
 POST = "POST"
@@ -159,8 +157,9 @@ def get_coin():
     c = r.json()['data']['data'][:15]
     print(c)
 
-def get_coin_data():
-    result = marketAPI.get_history_candlesticks(f'{coin}-USDT', bar=period)['data']
+def get_coin_data(coin):
+    title = f'🏆{coin}🏆\n'
+    result = marketAPI.get_history_candlesticks(coin, bar=period)['data']
     print(result)
     print("涨跌幅")
     close = result[0][4]
@@ -239,4 +238,5 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    get_coin_data()
+    coin = 'ETH-USDT'
+    get_coin_data(coin)

@@ -158,8 +158,8 @@ def get_coin():
     print(c)
 
 def get_coin_data(coin):
-    title = f'{coin}🏆 5️⃣<b>分钟</b> 🏆\n'
-    result = marketAPI.get_history_candlesticks(f'{coin}-USDT', bar=period)['data']
+    title = f'🏆{coin}🏆\n'
+    result = marketAPI.get_history_candlesticks(coin, bar=period)['data']
     print(result)
     print("涨跌幅")
     close = result[0][4]
@@ -239,5 +239,7 @@ if __name__ == '__main__':
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
     coin_list = get_coin()
-    for coin in coin_list:
+    for i in coin_list:
+        coin = i['instId']
+        print(coin)
         get_coin_data(coin)
