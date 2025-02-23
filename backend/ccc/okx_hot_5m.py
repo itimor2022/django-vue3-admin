@@ -155,7 +155,7 @@ def get_coin():
     # pair_list = ['CATI-USDT']
     r = requests.get(url)
     c = r.json()['data']['data'][:15]
-    print(c)
+    return c
 
 def get_coin_data(coin):
     title = f'🏆{coin}🏆\n'
