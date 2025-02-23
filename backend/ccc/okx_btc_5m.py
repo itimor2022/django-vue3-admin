@@ -181,7 +181,6 @@ def get_coin_data(coin):
     return_2 = (float(result[2][4]) / float(result[2][1]) - 1) * 100
     return_3 = (float(result[3][4]) / float(result[3][1]) - 1) * 100
     return_4 = (float(result[4][4]) / float(result[4][1]) - 1) * 100
-    return_x = round(abs(return_0) / abs(return_1), 2)
     return_now = round(return_0, 2)
     return_list = [return_0, return_1, return_2, return_3, return_4]
     positive_count = len([num for num in return_list if num > 0])
@@ -205,16 +204,9 @@ def get_coin_data(coin):
             b+=i
     if abs(s) / b > 5:
         if return_0 > 0:
-            msg = f'✳️合并阳柱 {title}<strike>🚦涨幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+            msg = f'✳️大阳柱 {title}<strike>🚦涨幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         else:
-            msg = f'🚫合并阴柱 {title}<strike>🚦跌幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
-        send_message(msg, chat_id=chat_id)
-
-    if return_x > 5:
-        if return_0 > 0:
-            msg = f'✳️阳柱 {title}<strike>🚦涨幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
-        else:
-            msg = f'🚫阴柱 {title}<strike>🚦跌幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+            msg = f'🚫大阴柱 {title}<strike>🚦跌幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
     # 对比成交量
