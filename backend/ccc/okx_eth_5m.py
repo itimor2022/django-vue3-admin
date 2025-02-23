@@ -148,8 +148,18 @@ class MarketAPI(Client):
         para = {'instId': instId, 'after': after, 'before': before, 'bar': bar, 'limit': limit}
         return self.request_with_para(GET, url, para)
 
-
 def get_coin():
+    period = '5m'
+    # 热门榜
+    url = f"https://www.okx.com/priapi/v5/rubik/web/public/hot-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type=USDT&t={t}"
+    # 成交额
+    # url = f"https://www.okx.com/priapi/v5/rubik/web/public/turn-over-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type=USDT&t={t}"
+    # pair_list = ['CATI-USDT']
+    r = requests.get(url)
+    c = r.json()['data']['data'][:15]
+    print(c)
+
+def get_coin_data():
     result = marketAPI.get_history_candlesticks(f'{coin}-USDT', bar=period)['data']
     print(result)
     print("涨跌幅")
@@ -201,14 +211,6 @@ def get_coin():
             msg = f'🚫合并阴柱 {title}<strike>🚦跌幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
-    n = round(abs(return_0), 2)
-    if n > 0.5:
-        if return_0 > 0:
-            msg = f'🈯涨跌幅 {title}<strike>🚦涨幅超大</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
-        else:
-            msg = f'⭕️涨跌幅 {title}<strike>🚦跌幅超大</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
-        send_message(msg, chat_id=chat_id)
-
     if return_x > 5:
         if return_0 > 0:
             msg = f'✳️阳柱 {title}<strike>🚦涨幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
@@ -237,4 +239,4 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    get_coin()
+    get_coin_data()
