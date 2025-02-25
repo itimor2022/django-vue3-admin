@@ -189,11 +189,11 @@ def get_coin_data(coin):
         send_message(msg, chat_id=chat_id)
 
     if return_0 > 0:
-        shang_line_0 = result[0][2] - result[0][4] + 0.000001
-        shang_line_1 = result[1][2] - result[1][4] + 0.000001
+        shang_line_0 = float(result[0][2]) - float(result[0][4]) + 0.00000001
+        shang_line_1 = float(result[1][2]) - float(result[1][4]) + 0.00000001
     else:
-        shang_line_0 = result[0][2] - result[0][1] + 0.000001
-        shang_line_1 = result[1][2] - result[1][1] + 0.000001
+        shang_line_0 = float(result[0][2]) - float(result[0][1]) + 0.00000001
+        shang_line_1 = float(result[1][2]) - float(result[1][1]) + 0.00000001
     shang_line_x = shang_line_0 / shang_line_1
     print(f'上影线: {shang_line_x}')
     if shang_line_x>5:
