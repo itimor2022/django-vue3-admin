@@ -191,16 +191,16 @@ def get_coin_data(coin):
 
     if return_0 > 0:
         shang_line_0 = float(result[0][2]) - float(result[0][4]) + 0.00000001
-        shang_line_1 = float(result[1][2]) - float(result[1][4]) + 0.00000001
     else:
         shang_line_0 = float(result[0][2]) - float(result[0][1]) + 0.00000001
-        shang_line_1 = float(result[1][2]) - float(result[1][1]) + 0.00000001
-    shang_line_x = shang_line_0 / shang_line_1
+    shang_line_x = shang_line_0 / return_0
     print(f'上影线0: {shang_line_0}')
-    print(f'上影线1: {shang_line_1}')
     print(f'上影线x: {shang_line_x}')
-    if shang_line_x>5:
-        msg = f'👺上影线巨大 {title} 🚦上影线0:{shang_line_0} 🚦上影线1:{shang_line_1} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+    if 2.5 < shang_line_x < 5:
+        msg = f'👺上影线2.5倍 {title} 🚦上影线0:{shang_line_0} 🚦上影线1:{shang_line_1} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        send_message(msg, chat_id=chat_id)
+    if shang_line_x > 5:
+        msg = f'🔥上影线5倍 {title} 🚦上影线0:{shang_line_0} 🚦上影线1:{shang_line_1} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
     s = 0

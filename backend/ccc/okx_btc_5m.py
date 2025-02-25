@@ -24,6 +24,7 @@ OK_ACCESS_SIGN = 'OK-ACCESS-SIGN'
 OK_ACCESS_TIMESTAMP = 'OK-ACCESS-TIMESTAMP'
 OK_ACCESS_PASSPHRASE = 'OK-ACCESS-PASSPHRASE'
 
+
 def send_message(msg, chat_id="-4591709428"):
     token1 = "7114302"
     token2 = "389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
@@ -132,6 +133,7 @@ class MarketAPI(Client):
         para = {'instId': instId, 'after': after, 'before': before, 'bar': bar, 'limit': limit}
         return self.request_with_para(GET, url, para)
 
+
 def format_time(time_stamp, tz=0):
     dt = datetime.datetime.fromtimestamp(time_stamp)
     # 设置时区
@@ -139,6 +141,7 @@ def format_time(time_stamp, tz=0):
     # 格式化日期
     dd = x.strftime("%Y-%m-%d %H:%M:%S %Z%z")
     return dd
+
 
 def get_coin():
     period = '5m'
@@ -151,6 +154,7 @@ def get_coin():
     c = r.json()['data']['data'][:15]
     print(c)
 
+
 def get_coin_data(coin):
     title = f'🏆{coin}🏆\n'
     result = marketAPI.get_history_candlesticks(coin, bar=period)['data']
@@ -162,7 +166,7 @@ def get_coin_data(coin):
     y = format_time(time_stamp, tz=0)
     print('本地时间：', x)
     print('UTC时间：', y)
-    #成交量
+    # 成交量
     volume_list = [v[6] for v in result]
     v1 = volume_list[0]
     vmax = max(volume_list[:50])
@@ -181,34 +185,34 @@ def get_coin_data(coin):
     print(return_list)
     print(positive_count)
     print(negative_count)
-    if negative_count >=4:
+    if negative_count >= 4:
         msg = f'📉5连续阴 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
-    if positive_count >=4:
+    if positive_count >= 4:
         msg = f'📈5连阳 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
     if return_0 > 0:
         shang_line_0 = float(result[0][2]) - float(result[0][4]) + 0.00000001
-        shang_line_1 = float(result[1][2]) - float(result[1][4]) + 0.00000001
     else:
         shang_line_0 = float(result[0][2]) - float(result[0][1]) + 0.00000001
-        shang_line_1 = float(result[1][2]) - float(result[1][1]) + 0.00000001
-    shang_line_x = shang_line_0 / shang_line_1
+    shang_line_x = shang_line_0 / return_0
     print(f'上影线0: {shang_line_0}')
-    print(f'上影线1: {shang_line_1}')
     print(f'上影线x: {shang_line_x}')
-    if shang_line_x>5:
-        msg = f'👺上影线巨大 {title} 🚦上影线0:{shang_line_0} 🚦上影线1:{shang_line_1} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+    if 2.5 < shang_line_x < 5:
+        msg = f'👺上影线2.5倍 {title} 🚦上影线0:{shang_line_0} 🚦上影线1:{shang_line_1} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        send_message(msg, chat_id=chat_id)
+    if shang_line_x > 5:
+        msg = f'🔥上影线5倍 {title} 🚦上影线0:{shang_line_0} 🚦上影线1:{shang_line_1} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
     s = 0
     b = 0
     for i in return_list:
         if i <= 0:
-            s+=i
+            s += i
         else:
-            b+=i
+            b += i
     if abs(s) / b > 5:
         if return_0 > 0:
             msg = f'✳️大阳柱 {title}<strike>🚦涨幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
