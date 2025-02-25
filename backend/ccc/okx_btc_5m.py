@@ -200,10 +200,10 @@ def get_coin_data(coin):
     print(f'上影线0: {shang_line_0}')
     print(f'上影线x: {shang_line_x}')
     if 2.5 < shang_line_x < 5:
-        msg = f'👺上影线2.5倍 {title} 🚦上影线0:{shang_line_0} 🚦上影线1:{shang_line_1} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        msg = f'👺上影线2.5倍 {title} 🚦上影线0:{shang_line_0} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
     if shang_line_x > 5:
-        msg = f'🔥上影线5倍 {title} 🚦上影线0:{shang_line_0} 🚦上影线1:{shang_line_1} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        msg = f'🔥上影线5倍 {title} 🚦上影线0:{shang_line_0} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
     s = 0
