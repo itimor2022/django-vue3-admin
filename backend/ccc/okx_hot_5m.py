@@ -200,7 +200,7 @@ def get_coin_data(coin):
         shang_line_0 = result[0][2] - result[0][1] + 0.000001
         shang_line_1 = result[1][2] - result[1][1] + 0.000001
     shang_line_x = shang_line_0 / shang_line_1
-
+    print(f'上影线: {shang_line_x}')
     if shang_line_x > 5:
         msg = f'👺上影线巨大 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
