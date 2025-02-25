@@ -6,8 +6,7 @@ import time
 import datetime
 import hmac
 import base64
-
-from datetime import datetime as DT
+import pytz
 
 '''para
 '''
@@ -25,17 +24,6 @@ OK_ACCESS_KEY = 'OK-ACCESS-KEY'
 OK_ACCESS_SIGN = 'OK-ACCESS-SIGN'
 OK_ACCESS_TIMESTAMP = 'OK-ACCESS-TIMESTAMP'
 OK_ACCESS_PASSPHRASE = 'OK-ACCESS-PASSPHRASE'
-
-
-def stamp2time(timeStamp):  # 时间戳转日期函数
-    """
-    功能：将时间戳转换成日期函数 例如：1606708276268 ==》2020-11-30 11:51:16
-    参数：timeStamp 时间戳，类型 double 例如：1606708276268
-    返回值：日期， 类型：字符串 2020-11-30 11:51:16
-    """
-    time_local = time.localtime(int(timeStamp) / 1000)
-    dt = time.strftime("%Y-%m-%d %H:%M:%S", time_local)
-    return dt
 
 
 def send_message(msg, chat_id="-4591709428"):
@@ -146,6 +134,16 @@ class MarketAPI(Client):
         para = {'instId': instId, 'after': after, 'before': before, 'bar': bar, 'limit': limit}
         return self.request_with_para(GET, url, para)
 
+
+def format_time(time_stamp, tz=0):
+    dt = datetime.datetime.fromtimestamp(time_stamp)
+    # 设置时区
+    x = dt.astimezone(datetime.timezone(datetime.timedelta(hours=tz)))
+    # 格式化日期
+    dd = x.strftime("%Y-%m-%d %H:%M:%S %Z%z")
+    return dd
+
+
 def get_coin():
     period = '5m'
     # 热门榜
@@ -157,6 +155,7 @@ def get_coin():
     c = r.json()['data']['data'][:15]
     return c
 
+
 def get_coin_data(coin):
     title = f'🏆{coin}🏆\n'
     result = marketAPI.get_history_candlesticks(coin, bar=period)['data']
@@ -164,12 +163,11 @@ def get_coin_data(coin):
     print("涨跌幅")
     close = result[0][4]
     time_stamp = int(result[0][0]) / 1000
-    time_stamp_array = time.localtime(time_stamp)
-    x = time.strftime("%Y-%m-%d %H:%M:%S", time_stamp_array)
-    y = DT.utcfromtimestamp(time_stamp).strftime("%Y-%m-%d %H:%M:%S")
+    x = format_time(time_stamp, tz=7)
+    y = format_time(time_stamp, tz=0)
     print('本地时间：', x)
     print('UTC时间：', y)
-    #成交量
+    # 成交量
     volume_list = [v[6] for v in result]
     v1 = volume_list[0]
     vmax = max(volume_list[:50])
@@ -188,20 +186,32 @@ def get_coin_data(coin):
     print(return_list)
     print(positive_count)
     print(negative_count)
-    if negative_count >=4:
+    if negative_count >= 4:
         msg = f'📉5连续阴 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
-    if positive_count >=4:
+    if positive_count >= 4:
         msg = f'📈5连阳 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        send_message(msg, chat_id=chat_id)
+
+    if return_0 > 0:
+        shang_line_0 = result[0][2] - result[0][4] + 0.000001
+        shang_line_1 = result[1][2] - result[1][4] + 0.000001
+    else:
+        shang_line_0 = result[0][2] - result[0][1] + 0.000001
+        shang_line_1 = result[1][2] - result[1][1] + 0.000001
+    shang_line_x = shang_line_0 / shang_line_1
+
+    if shang_line_x > 5:
+        msg = f'👺上影线巨大 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
     s = 0
     b = 0
     for i in return_list:
         if i <= 0:
-            s+=i
+            s += i
         else:
-            b+=i
+            b += i
     if abs(s) / b > 5:
         if return_0 > 0:
             msg = f'✳️大阳柱 {title}<strike>🚦涨幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
