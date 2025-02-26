@@ -169,9 +169,9 @@ def get_coin_data(coin):
     print('UTC时间：', y)
     # 成交量
     volume_list = [v[6] for v in result]
-    v1 = volume_list[0]
+    v0 = volume_list[0]
     vmax = max(volume_list[:50])
-    if v1 == vmax:
+    if v0 == vmax:
         msg = f'🈵🈯成交量史前巨大 {title}<strike>🚦🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
     return_0 = (float(result[0][4]) / float(result[0][1]) - 1) * 100
@@ -238,6 +238,13 @@ def get_coin_data(coin):
             msg = f'💢成交量 {title}<strike>🚦成交量超倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
+    print("最高收盘价")
+    close_list = [v[6] for v in result]
+    c0 = close_list[0]
+    cmax = max(close_list)
+    if c0 == cmax:
+        msg = f'👺最高收盘价 {title} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        send_message(msg, chat_id=chat_id)
 
 if __name__ == '__main__':
     api_key = "ff633c9f-eeb1-4073-bfbc-de5a93af409c"

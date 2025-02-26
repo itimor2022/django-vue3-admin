@@ -166,13 +166,16 @@ def get_coin_data(coin):
     y = format_time(time_stamp, tz=0)
     print('本地时间：', x)
     print('UTC时间：', y)
-    # 成交量
+
+    print("成交量")
     volume_list = [v[6] for v in result]
-    v1 = volume_list[0]
+    v0 = volume_list[0]
     vmax = max(volume_list[:50])
-    if v1 == vmax:
+    if v0 == vmax:
         msg = f'🈵🈯成交量史前巨大 {title}<strike>🚦🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
+
+    print("连续阴跌")
     return_0 = (float(result[0][4]) / float(result[0][1]) - 1) * 100
     return_1 = (float(result[1][4]) / float(result[1][1]) - 1) * 100
     return_2 = (float(result[2][4]) / float(result[2][1]) - 1) * 100
@@ -192,6 +195,7 @@ def get_coin_data(coin):
         msg = f'📈5连阳 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
+    print("上影线")
     if return_0 > 0:
         shang_line_0 = float(result[0][2]) - float(result[0][4]) + 0.00000001
         shang_line_1 = float(result[1][2]) - float(result[1][4]) + 0.00000001
@@ -209,6 +213,7 @@ def get_coin_data(coin):
         msg = f'👺上影线5倍 {title} 🚦上影线x:{shang_line_x} 🚦上影线0:{shang_line_0} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
+    print("大阴柱")
     s = 0
     b = 0
     for i in return_list:
@@ -223,8 +228,7 @@ def get_coin_data(coin):
             msg = f'🚫大阴柱 {title}<strike>🚦跌幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
-    # 对比成交量
-    print("成交量")
+    print("同比成交量")
     volume_0 = round(float(result[0][5]) / float(result[1][5]), 2)
     volume_1 = round(float(result[0][5]) / float(result[2][5]), 2)
     volume_x = max(volume_0, volume_1)
@@ -235,6 +239,14 @@ def get_coin_data(coin):
             msg = f'💹成交量 {title}<strike>🚦成交量超倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         else:
             msg = f'💢成交量 {title}<strike>🚦成交量超倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        send_message(msg, chat_id=chat_id)
+
+    print("最高收盘价")
+    close_list = [v[6] for v in result]
+    c0 = close_list[0]
+    cmax = max(close_list)
+    if c0 == cmax:
+        msg = f'👺最高收盘价 {title} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
         send_message(msg, chat_id=chat_id)
 
 
