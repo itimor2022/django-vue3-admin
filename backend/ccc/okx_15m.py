@@ -166,7 +166,7 @@ def get_coin():
     # url = f"https://aws.okx.com/priapi/v5/rubik/web/public/new-coin-rank?zone=utc8&type=USDT&countryFilter=1&rank=0"
     r = requests.get(url)
     c = r.json()['data']['data']
-    return c[:10]
+    return c[:20]
 
 
 def get_tag(df):
@@ -207,10 +207,9 @@ def get_coin_data(coin):
     df = df[columns]
     df[columns[1:]] = df[columns[1:]].apply(pd.to_numeric, errors='coerce').fillna(0.0)
     managed_df = get_tag(df)
-    print(managed_df[:10])
-
     return_0 = managed_df['return_0'].iloc[0]
     dt = managed_df['datetime'].iloc[0]
+    print(managed_df[:10])
 
     if managed_df['is_san_yang'].iloc[0] == 1:
         print("三连阳")
