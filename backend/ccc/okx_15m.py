@@ -207,7 +207,7 @@ def get_coin_data(coin):
     df = df[columns]
     df[columns[1:]] = df[columns[1:]].apply(pd.to_numeric, errors='coerce').fillna(0.0)
     managed_df = get_tag(df)
-    print(managed_df)
+    print(managed_df[:10])
 
     return_0 = managed_df['return_0'].iloc[0]
     dt = managed_df['datetime'].iloc[0]
