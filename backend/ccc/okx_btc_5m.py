@@ -172,7 +172,7 @@ def get_coin_data(coin):
     v0 = volume_list[0]
     vmax = max(volume_list[:50])
     if v0 == vmax:
-        msg = f'🈵🈯成交量史前巨大 {title}<strike>🚦🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        msg = f'🈵🈯成交量史前巨大 {title}<strike>🚦🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
 
     print("连续阴跌")
@@ -189,10 +189,10 @@ def get_coin_data(coin):
     print(positive_count)
     print(negative_count)
     if negative_count >= 4:
-        msg = f'📉5连续阴 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        msg = f'📉5连续阴 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
     if positive_count >= 4:
-        msg = f'📈5连阳 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        msg = f'📈5连阳 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
 
     print("上影线")
@@ -208,7 +208,7 @@ def get_coin_data(coin):
     print(f'上影线x: {shang_line_x}')
     if shang_line_0 > return_0:
         if shang_line_x>5:
-            msg = f'👺上影线5倍 {title} 🚦上影线x:{shang_line_x} 🚦上影线0:{shang_line_0} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+            msg = f'👺上影线5倍 {title} 🚦上影线x:{shang_line_x} 🚦上影线0:{shang_line_0} 🍄当前价:{close} \n本地时间:{x}'
             send_message(msg, chat_id=chat_id)
 
     print("大阴柱")
@@ -221,9 +221,9 @@ def get_coin_data(coin):
             b += i
     if abs(s) / b > 5:
         if return_0 > 0:
-            msg = f'✳️大阳柱 {title}<strike>🚦涨幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+            msg = f'✳️大阳柱 {title}<strike>🚦涨幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x}'
         else:
-            msg = f'🚫大阴柱 {title}<strike>🚦跌幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+            msg = f'🚫大阴柱 {title}<strike>🚦跌幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
 
     print("同比成交量")
@@ -234,9 +234,9 @@ def get_coin_data(coin):
     print(volume_1)
     if volume_x > 5:
         if return_0 > 0:
-            msg = f'💹成交量 {title}<strike>🚦成交量超倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+            msg = f'💹成交量 {title}<strike>🚦成交量超倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x}'
         else:
-            msg = f'💢成交量 {title}<strike>🚦成交量超倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+            msg = f'💢成交量 {title}<strike>🚦成交量超倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
 
     print("最高收盘价")
@@ -244,7 +244,7 @@ def get_coin_data(coin):
     c0 = close_list[0]
     cmax = max(close_list)
     if c0 == cmax:
-        msg = f'👺最高收盘价 {title} 🍄当前价:{close} \n本地时间:{x} UTC时间:{y}'
+        msg = f'👺最高收盘价 {title} 🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
 
 
