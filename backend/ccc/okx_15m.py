@@ -7,7 +7,6 @@ import datetime
 import hmac
 import base64
 import pandas as pd
-from django.db.models.expressions import result
 
 # 设置最大列数，避免只显示部分列
 pd.set_option('display.max_columns', 1000)
