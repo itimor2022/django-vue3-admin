@@ -167,7 +167,7 @@ def get_coin():
     r = requests.get(url)
     print(r.url)
     c = r.json()['data']['data']
-    return c[:10]
+    return c[:20]
 
 
 def get_tag(df):
@@ -249,9 +249,9 @@ if __name__ == '__main__':
     # get_coin_data(coin)
     coins = get_coin()
     print(coins)
-    exclude_list = ['USTC-USDT', 'TON-USDT', 'USDC-USDT']
-    for i in coins:
-        coin = i["instId"]
-        if coin in exclude_list:
-            continue
-        get_coin_data(coin)
+    # exclude_list = ['USTC-USDT', 'TON-USDT', 'USDC-USDT']
+    # for i in coins:
+    #     coin = i["instId"]
+    #     if coin in exclude_list:
+    #         continue
+    #     get_coin_data(coin)
