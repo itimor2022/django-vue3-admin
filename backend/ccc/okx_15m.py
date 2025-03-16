@@ -159,14 +159,15 @@ def get_coin():
     # 成交额
     # url = f"https://www.okx.com/priapi/v5/rubik/web/public/turn-over-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type=USD&t={t}"
     # 1小时涨幅榜 1H
-    url = f"https://aws.okx.com/priapi/v5/rubik/web/public/up-down-rank?period=1H&zone=utc8&type=USDT&countryFilter=1&rank=0&t={t}"
+    url = f"https://aws.okx.com/priapi/v5/rubik/web/public/up-down-rank?period=1H&zone=utc8&type=USDT&countryFilter=1&rank=0"
     # 当天涨幅榜 1D
     # url = f"https://aws.okx.com/priapi/v5/rubik/web/public/up-down-rank?period=1D&zone=utc8&type=USDT&countryFilter=1&rank=0&t={t}"
     # 新币榜
     # url = f"https://aws.okx.com/priapi/v5/rubik/web/public/new-coin-rank?zone=utc8&type=USDT&countryFilter=1&rank=0"
     r = requests.get(url)
+    print(r.url)
     c = r.json()['data']['data']
-    return c[:20]
+    return c[:10]
 
 
 def get_tag(df):
@@ -202,36 +203,36 @@ def get_coin_data(coin):
     df = pd.DataFrame(result)
     col = ['timestamp', 'open', 'high', 'low', 'close', 'volume', 'amount', '-', '-']
     df.columns = col
-    df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
+    df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms').dt.tz_localize('UTC').dt.tz_convert('Asia/Phnom_Penh')
     columns = ['datetime', 'open', 'high', 'low', 'close', 'volume', 'amount', 'timestamp']
-    df = df[columns]
+    df = df[columns].sort_values(['timestamp'], ascending=True)
     df[columns[1:]] = df[columns[1:]].apply(pd.to_numeric, errors='coerce').fillna(0.0)
     managed_df = get_tag(df)
     return_0 = managed_df['return_0'].iloc[0]
-    dt = managed_df['datetime'].iloc[0]
-    print(managed_df[:10])
+    dt = managed_df['datetime'].iloc[-1]
+    print(managed_df[90:])
 
-    if managed_df['is_san_yang'].iloc[0] == 1:
+    if managed_df['is_san_yang'].iloc[-1] == 1:
         print("三连阳")
         msg = f'👺三连阳 {title} 🍄涨幅:{return_0} \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['is_san_yang'].iloc[0] == 1:
+    if managed_df['is_san_yang'].iloc[-1] == 1:
         print("三连阴")
         msg = f'👺三连阴 {title} 🍄涨幅:{return_0} \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['is_max_price'].iloc[0] == 1:
+    if managed_df['is_max_price'].iloc[-1] == 1:
         print("最高价")
         msg = f'👺最高价 {title} 🍄涨幅:{return_0} \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['is_min_price'].iloc[0] == 1:
+    if managed_df['is_min_price'].iloc[-1] == 1:
         print("最低价")
         msg = f'👺最低价 {title} 🍄涨幅:{return_0} \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['is_max_volume'].iloc[0] == 1:
+    if managed_df['is_max_volume'].iloc[-1] == 1:
         print("最大量")
         msg = f'👺最大量 {title} 🍄涨幅:{return_0} \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
@@ -248,5 +249,9 @@ if __name__ == '__main__':
     # get_coin_data(coin)
     coins = get_coin()
     print(coins)
-    for coin in coins:
-        get_coin_data(coin["instId"])
+    exclude_list = ['USTC-USDT', 'TON-USDT']
+    for i in coins:
+        coin = i["instId"]
+        if coin in exclude_list:
+            continue
+        get_coin_data(coin)
