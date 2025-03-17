@@ -7,6 +7,9 @@ import datetime
 import hmac
 import base64
 import pandas as pd
+from bs4 import BeautifulSoup
+from lxml import etree
+
 
 # 设置最大列数，避免只显示部分列
 pd.set_option('display.max_columns', 1000)
@@ -38,7 +41,8 @@ OK_ACCESS_PASSPHRASE = 'OK-ACCESS-PASSPHRASE'
 def send_message(msg, chat_id="-4591709428"):
     token1 = "7114302"
     token2 = "389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
-    url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}&parse_mode=HTML"
+    parse_mode = "MarkdownV2"  # HTML MarkdownV2
+    url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}&parse_mode={parse_mode}"
     r = requests.get(url)
     print(r.json())
 
@@ -153,7 +157,8 @@ def format_time(time_stamp, tz=0):
     return dd
 
 
-def get_coin():
+def get_coin1():
+    # 放到服务器上执行， 通过api获取数据, 数据就不对
     # 热门榜
     # url = f"https://www.okx.com/priapi/v5/rubik/web/public/hot-rank?countryFilter=1&rank=0&zone=utc8&type=USD&t={t}"
     # 成交额
@@ -169,6 +174,20 @@ def get_coin():
     c = r.json()['data']['data']
     return c[:20]
 
+def get_coin():
+    # 爬虫爬取页面，不通过api获取数据
+    url = "https://www.okx.com/zh-hans/markets/explore/notable-change/5min-up"
+    headers = {
+        'User-Agent': "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1"}
+    html = requests.get(url,headers=headers)
+    selector=etree.HTML(html.text)
+    a=selector.xpath('//table/tbody/tr[*]/td[1]/a/text()')
+    b = list(dict.fromkeys(a))[:10]
+    msg = f':joy: 🏆5分钟异动币🏆'
+    for i in b:
+        msg += f"\n`{i}`\n"
+    send_message(msg, chat_id=chat_id)
+    return b
 
 def get_tag(df):
     df['max_volume'] = df['volume'].rolling(50).max()
@@ -245,13 +264,8 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    # coin = 'BTC-USDT'
-    # get_coin_data(coin)
     coins = get_coin()
     print(coins)
-    exclude_list = ['USTC-USDT', 'DAI-USDT', 'USDC-USDT']
-    for i in coins:
-        coin = i["instId"]
-        if coin in exclude_list:
-            continue
-        get_coin_data(coin)
+    # for i in coins:
+    #     coin = i["instId"]
+    #     get_coin_data(coin)
