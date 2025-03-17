@@ -180,6 +180,7 @@ def get_coin():
     headers = {
         'User-Agent': "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1"}
     html = requests.get(url,headers=headers)
+    print(html.text)
     selector=etree.HTML(html.text)
     a=selector.xpath('//table/tbody/tr[*]/td[1]/a/text()')
     b = list(dict.fromkeys(a))[:10]
