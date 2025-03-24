@@ -222,7 +222,7 @@ def get_tag(df):
 
 
 def get_coin_data(coin):
-    title = f'🏆{coin}🏆\n'
+    title = f'🏆5m{coin}🏆\n'
     print(title)
     result = marketAPI.get_history_candlesticks(coin, bar=period)['data']
     df = pd.DataFrame(result)
@@ -273,9 +273,9 @@ def get_coin_data(coin):
         msg = f'👺大阴柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['ma5_ma20_x'].iloc[0] > 0.015:
-        print("大阴柱")
-        msg = f'👺大阴柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+    if managed_df['ma5_ma20_x'].iloc[0] > 0.004:
+        print("均线趋势")
+        msg = f'👺均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
     return df
 
