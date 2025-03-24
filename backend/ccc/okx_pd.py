@@ -23,7 +23,7 @@ pd.set_option('display.max_colwidth', 1000)
 '''
 t = int(time.time())
 period = '5m'
-chat_id = "-1002086380388"
+chat_id = "0002086380388"
 GET = "GET"
 POST = "POST"
 API_URL = 'https://www.okx.com'
@@ -85,7 +85,7 @@ class base():
         url = '?'
         for key, value in para.items():
             url = url + str(key) + '=' + str(value) + '&'
-        return url[0:-1]
+        return url[0:0]
 
 
 class Client(object):
@@ -209,6 +209,12 @@ def get_tag(df):
             (df['close'].shift(1) <= df['open'].shift(1)) &
             (df['close'].shift(2) <= df['open'].shift(2))
     )
+    # ema
+    ma_list = [5, 10, 20]
+    for ma in ma_list:
+        df['ma' + str(ma)] = df["close"].ewm(span=ma, adjust=False).mean()
+    df['ma5_ma20_x'] = abs(df['ma5'] / df['ma20'] - 1)
+
     df.drop(['max_volume', 'min_price', 'max_price'], axis=1, inplace=True)
     round_dict = {'return_0': 2}
     df = df.round(round_dict)
@@ -226,42 +232,48 @@ def get_coin_data(coin):
     columns = ['datetime', 'open', 'high', 'low', 'close', 'volume', 'amount', 'timestamp']
     df = df[columns].sort_values(['timestamp'], ascending=True)
     df[columns[1:]] = df[columns[1:]].apply(pd.to_numeric, errors='coerce').fillna(0.0)
-    managed_df = get_tag(df)
+    df = get_tag(df)
+    managed_df = df.sort_values(['timestamp'], ascending=False)
     return_0 = managed_df['return_0'].iloc[0]
-    dt = managed_df['datetime'].iloc[-1]
-    print(managed_df[90:])
+    dt = managed_df['datetime'].iloc[0]
+    print(managed_df)
 
-    if managed_df['is_san_yang'].iloc[-1] == 1:
+    if managed_df['is_san_yang'].iloc[0] == 1:
         print("三连阳")
         msg = f'👺三连阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['is_san_yang'].iloc[-1] == 1:
+    if managed_df['is_san_yang'].iloc[0] == 1:
         print("三连阴")
         msg = f'👺三连阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['is_max_price'].iloc[-1] == 1:
+    if managed_df['is_max_price'].iloc[0] == 1:
         print("最高价")
         msg = f'👺最高价 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['is_min_price'].iloc[-1] == 1:
+    if managed_df['is_min_price'].iloc[0] == 1:
         print("最低价")
         msg = f'👺最低价 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['is_max_volume'].iloc[-1] == 1:
+    if managed_df['is_max_volume'].iloc[0] == 1:
         print("最大量")
         msg = f'👺最大量 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['return_0'].iloc[-1] >= 2:
+    if managed_df['return_0'].iloc[0] >= 2:
         print("大阳柱")
         msg = f'👺大阳柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['return_0'].iloc[-1] <= -2:
+    if managed_df['return_0'].iloc[0] <= -2:
+        print("大阴柱")
+        msg = f'👺大阴柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        send_message(msg, chat_id=chat_id)
+
+    if managed_df['ma5_ma20_x'].iloc[0] > 0.015:
         print("大阴柱")
         msg = f'👺大阴柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
@@ -275,7 +287,7 @@ if __name__ == '__main__':
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
     # coins = get_coin()
-    coins = ['BTC-USDT','AUCTION-USDT']
+    coins = ['BTC-USDT', 'ETH-USDT', 'AUCTION-USDT', 'W-USDT', 'ZETA-USDT', 'NEIRO-USDT']
     print(coins)
     for coin in coins:
         get_coin_data(coin)
