@@ -143,18 +143,6 @@ def format_time(time_stamp, tz=0):
     return dd
 
 
-def get_coin():
-    period = '5m'
-    # 热门榜
-    url = f"https://www.okx.com/priapi/v5/rubik/web/public/hot-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type=USDT&t={t}"
-    # 成交额
-    # url = f"https://www.okx.com/priapi/v5/rubik/web/public/turn-over-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type=USDT&t={t}"
-    # pair_list = ['CATI-USDT']
-    r = requests.get(url)
-    c = r.json()['data']['data'][:15]
-    print(c)
-
-
 def get_coin_data(coin):
     title = f'🏆{coin}🏆\n'
     result = marketAPI.get_history_candlesticks(coin, bar=period)['data']
@@ -167,63 +155,24 @@ def get_coin_data(coin):
     print('本地时间：', x)
     print('UTC时间：', y)
 
-    print("成交量")
+    print("巨大成交量")
     volume_list = [v[6] for v in result]
     v0 = volume_list[0]
     vmax = max(volume_list[:50])
     if v0 == vmax:
-        msg = f'🈵🈯成交量史前巨大 {title}<strike>🚦🍄当前价:{close} \n本地时间:{x}'
+        msg = f'🈵🈯成交量屎前巨大 {title}<strike>🚦🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
 
-    print("连续阴跌")
+    print("连续向上或向下")
     return_0 = (float(result[0][4]) / float(result[0][1]) - 1) * 100
     return_1 = (float(result[1][4]) / float(result[1][1]) - 1) * 100
     return_2 = (float(result[2][4]) / float(result[2][1]) - 1) * 100
-    return_3 = (float(result[3][4]) / float(result[3][1]) - 1) * 100
-    return_4 = (float(result[4][4]) / float(result[4][1]) - 1) * 100
     return_now = round(return_0, 2)
-    return_list = [return_0, return_1, return_2, return_3, return_4]
-    positive_count = len([num for num in return_list if num > 0])
-    negative_count = len([num for num in return_list if num < 0])
-    print(return_list)
-    print(positive_count)
-    print(negative_count)
-    if negative_count >= 4:
-        msg = f'📉5连续阴 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x}'
+    if return_0 <= 0 and return_1 <= 0 and return_2 <= 0:
+        msg = f'📉3连续阴 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
-    if positive_count >= 4:
-        msg = f'📈5连阳 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x}'
-        send_message(msg, chat_id=chat_id)
-
-    print("上影线")
-    if return_0 > 0:
-        shang_line_0 = float(result[0][2]) - float(result[0][4]) + 0.00000001
-        shang_line_1 = float(result[1][2]) - float(result[1][4]) + 0.00000001
-    else:
-        shang_line_0 = float(result[0][2]) - float(result[0][1]) + 0.00000001
-        shang_line_1 = float(result[1][2]) - float(result[1][1]) + 0.00000001
-    shang_line_x = shang_line_0 / shang_line_1
-    print(f'上影线0: {shang_line_0}')
-    print(f'上影线1: {shang_line_1}')
-    print(f'上影线x: {shang_line_x}')
-    if shang_line_0 > return_0:
-        if shang_line_x>5:
-            msg = f'👺上影线5倍 {title} 🚦上影线x:{shang_line_x} 🚦上影线0:{shang_line_0} 🍄当前价:{close} \n本地时间:{x}'
-            send_message(msg, chat_id=chat_id)
-
-    print("大阴柱")
-    s = 0
-    b = 0
-    for i in return_list:
-        if i <= 0:
-            s += i
-        else:
-            b += i
-    if abs(s) / b > 5:
-        if return_0 > 0:
-            msg = f'✳️大阳柱 {title}<strike>🚦涨幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x}'
-        else:
-            msg = f'🚫大阴柱 {title}<strike>🚦跌幅同比超倍</strike> <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x}'
+    if return_0 >= 0 and return_1 >= 0 and return_2 >= 0:
+        msg = f'📈3连阳 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
 
     print("同比成交量")
@@ -232,7 +181,7 @@ def get_coin_data(coin):
     volume_x = max(volume_0, volume_1)
     print(volume_0)
     print(volume_1)
-    if volume_x > 5:
+    if volume_x > 7:
         if return_0 > 0:
             msg = f'💹成交量 {title}<strike>🚦成交量超倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x}'
         else:
@@ -247,6 +196,13 @@ def get_coin_data(coin):
         msg = f'👺最高收盘价 {title} 🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
 
+    print("最低收盘价")
+    close_list = [v[6] for v in result]
+    c0 = close_list[0]
+    cmax = min(close_list)
+    if c0 == cmax:
+        msg = f'👺最低收盘价 {title} 🍄当前价:{close} \n本地时间:{x}'
+        send_message(msg, chat_id=chat_id)
 
 if __name__ == '__main__':
     api_key = "ff633c9f-eeb1-4073-bfbc-de5a93af409c"
@@ -254,5 +210,7 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    coin = 'BTC-USDT'
-    get_coin_data(coin)
+    coins = ['BTC-USDT','AUCTION-USDT','W-USDT','ZETA-USDT','NEIRO-USDT']
+    print(coins)
+    for coin in coins:
+        get_coin_data(coin)
