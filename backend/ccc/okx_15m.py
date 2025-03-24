@@ -144,7 +144,7 @@ def format_time(time_stamp, tz=0):
 
 
 def get_coin_data(coin):
-    title = f'🏆{coin}🏆\n'
+    title = f'🏆15m {coin}🏆\n'
     result = marketAPI.get_history_candlesticks(coin, bar=period)['data']
     print(result)
     print("涨跌幅")
@@ -168,10 +168,14 @@ def get_coin_data(coin):
     return_1 = (float(result[1][4]) / float(result[1][1]) - 1) * 100
     return_2 = (float(result[2][4]) / float(result[2][1]) - 1) * 100
     return_now = round(return_0, 2)
-    if return_0 <= 0 and return_1 <= 0 and return_2 <= 0:
-        msg = f'📉3连续阴 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x}'
+    mid_0 = (float(result[0][4]) + float(result[0][1])) / 2
+    mid_1 = (float(result[1][4]) + float(result[1][1])) / 2
+    mid_2 = (float(result[2][4]) + float(result[2][1])) / 2
+
+    if return_0 <= 0 and return_1 <= 0 and return_2 <= 0 and mid_0 < mid_1 < mid_2:
+        msg = f'📉3连阴 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
-    if return_0 >= 0 and return_1 >= 0 and return_2 >= 0:
+    if return_0 >= 0 and return_1 >= 0 and return_2 >= 0 and mid_0 > mid_1 > mid_2:
         msg = f'📈3连阳 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
 
