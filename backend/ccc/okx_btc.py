@@ -144,7 +144,9 @@ def format_time(time_stamp, tz=0):
 
 
 def get_coin_data(coin):
-    title = f'🏆15m {coin}🏆\n'
+    title = f'🏆{period} {coin}🏆\n'
+    print(coin)
+    print(period)
     result = marketAPI.get_history_candlesticks(coin, bar=period)['data']
     print(result)
     print("涨跌幅")
@@ -215,7 +217,7 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    coins = ['BTC-USDT', 'AUCTION-USDT', 'W-USDT', 'ZETA-USDT', 'NEIRO-USDT']
+    coins = ['BTC-USDT']
     print(coins)
     for coin in coins:
         get_coin_data(coin)

@@ -9,7 +9,6 @@ import base64
 import pandas as pd
 from lxml import etree
 
-
 # 设置最大列数，避免只显示部分列
 pd.set_option('display.max_columns', 1000)
 # 设置最大行数，避免只显示部分行数据
@@ -40,8 +39,7 @@ OK_ACCESS_PASSPHRASE = 'OK-ACCESS-PASSPHRASE'
 def send_message(msg, chat_id="-4591709428"):
     token1 = "7114302"
     token2 = "389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
-    parse_mode = "MarkdownV2"  # HTML MarkdownV2
-    url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}&parse_mode={parse_mode}"
+    url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}&parse_mode=HTML"
     r = requests.get(url)
     print(r.json())
 
@@ -85,7 +83,7 @@ class base():
         url = '?'
         for key, value in para.items():
             url = url + str(key) + '=' + str(value) + '&'
-        return url[0:0]
+        return url[0:-1]
 
 
 class Client(object):
@@ -155,7 +153,6 @@ def format_time(time_stamp, tz=0):
     dd = x.strftime("%Y-%m-%d %H:%M:%S %Z%z")
     return dd
 
-
 def get_coin1():
     # 放到服务器上执行， 通过api获取数据, 数据就不对
     # 热门榜
@@ -214,7 +211,6 @@ def get_tag(df):
     for ma in ma_list:
         df['ma' + str(ma)] = df["close"].ewm(span=ma, adjust=False).mean()
     df['ma5_ma20_x'] = abs(df['ma5'] / df['ma20'] - 1)
-    df['max_ma5_ma20_x'] = df['ma5_ma20_x'].rolling(10).max()
 
     df.drop(['max_volume', 'min_price', 'max_price'], axis=1, inplace=True)
     round_dict = {'return_0': 2}
@@ -224,7 +220,8 @@ def get_tag(df):
 
 def get_coin_data(coin):
     title = f'🏆{period} {coin}🏆\n'
-    print(title)
+    print(coin)
+    print(period)
     result = marketAPI.get_history_candlesticks(coin, bar=period)['data']
     print(result)
     df = pd.DataFrame(result)
@@ -235,6 +232,7 @@ def get_coin_data(coin):
     df = df[columns].sort_values(['timestamp'], ascending=True)
     df[columns[1:]] = df[columns[1:]].apply(pd.to_numeric, errors='coerce').fillna(0.0)
     df = get_tag(df)
+    df['max_ma5_ma20_x'] = df['ma5_ma20_x'].rolling(10).max()
     managed_df = df.sort_values(['timestamp'], ascending=False)
     return_0 = managed_df['return_0'].iloc[0]
     dt = managed_df['datetime'].iloc[0]
@@ -275,7 +273,8 @@ def get_coin_data(coin):
         msg = f'👺大阴柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['ma5_ma20_x'].iloc[1] > 0.015 and managed_df['ma5_ma20_x'].iloc[1] == managed_df['max_ma5_ma20_x'].iloc[0]:
+    if managed_df['ma5_ma20_x'].iloc[1] > 0.015 and managed_df['ma5_ma20_x'].iloc[1] == \
+            managed_df['max_ma5_ma20_x'].iloc[0]:
         print("均线趋势")
         msg = f'👺均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
@@ -288,7 +287,6 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    # coins = get_coin()
     coins = ['BTC-USDT', 'ETH-USDT', 'AUCTION-USDT', 'W-USDT', 'ZETA-USDT']
     print(coins)
     for coin in coins:
