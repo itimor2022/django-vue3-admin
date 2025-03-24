@@ -214,6 +214,7 @@ def get_tag(df):
     for ma in ma_list:
         df['ma' + str(ma)] = df["close"].ewm(span=ma, adjust=False).mean()
     df['ma5_ma20_x'] = abs(df['ma5'] / df['ma20'] - 1)
+    df['max_ma5_ma20_x'] = df['ma5_ma20_x'].rolling(10).max()
 
     df.drop(['max_volume', 'min_price', 'max_price'], axis=1, inplace=True)
     round_dict = {'return_0': 2}
@@ -222,7 +223,7 @@ def get_tag(df):
 
 
 def get_coin_data(coin):
-    title = f'🏆5m{coin}🏆\n'
+    title = f'🏆{period} {coin}🏆\n'
     print(title)
     result = marketAPI.get_history_candlesticks(coin, bar=period)['data']
     df = pd.DataFrame(result)
@@ -273,7 +274,7 @@ def get_coin_data(coin):
         msg = f'👺大阴柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['ma5_ma20_x'].iloc[0] > 0.004:
+    if managed_df['ma5_ma20_x'].iloc[1] > 0.015 and managed_df['ma5_ma20_x'].iloc[1] == managed_df['max_ma5_ma20_x'].iloc[0]:
         print("均线趋势")
         msg = f'👺均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
@@ -287,7 +288,7 @@ if __name__ == '__main__':
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
     # coins = get_coin()
-    coins = ['BTC-USDT', 'ETH-USDT', 'AUCTION-USDT', 'W-USDT', 'ZETA-USDT', 'NEIRO-USDT']
+    coins = ['BTC-USDT', 'ETH-USDT', 'AUCTION-USDT', 'W-USDT', 'ZETA-USDT']
     print(coins)
     for coin in coins:
         get_coin_data(coin)
