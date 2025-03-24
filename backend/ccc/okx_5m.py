@@ -275,7 +275,7 @@ if __name__ == '__main__':
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
     # coins = get_coin()
-    coins = ['BTC-USDT','AUCTION-USDT','W-USDT','PNUT-USDT', 'ZETA-USDT']
+    coins = ['BTC-USDT','AUCTION-USDT']
     print(coins)
     for coin in coins:
         get_coin_data(coin)
