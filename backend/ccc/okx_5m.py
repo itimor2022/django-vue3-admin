@@ -6,18 +6,6 @@ import time
 import datetime
 import hmac
 import base64
-import pandas as pd
-from lxml import etree
-
-
-# 设置最大列数，避免只显示部分列
-pd.set_option('display.max_columns', 1000)
-# 设置最大行数，避免只显示部分行数据
-pd.set_option('display.max_rows', 1000)
-# 设置显示宽度
-pd.set_option('display.width', 1000)
-# 设置每列最大宽度，避免属性值或列名显示不全
-pd.set_option('display.max_colwidth', 1000)
 
 '''para
 '''
@@ -40,8 +28,7 @@ OK_ACCESS_PASSPHRASE = 'OK-ACCESS-PASSPHRASE'
 def send_message(msg, chat_id="-4591709428"):
     token1 = "7114302"
     token2 = "389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
-    parse_mode = "MarkdownV2"  # HTML MarkdownV2
-    url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}&parse_mode={parse_mode}"
+    url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}&parse_mode=HTML"
     r = requests.get(url)
     print(r.json())
 
@@ -156,117 +143,66 @@ def format_time(time_stamp, tz=0):
     return dd
 
 
-def get_coin1():
-    # 放到服务器上执行， 通过api获取数据, 数据就不对
-    # 热门榜
-    # url = f"https://www.okx.com/priapi/v5/rubik/web/public/hot-rank?countryFilter=1&rank=0&zone=utc8&type=USD&t={t}"
-    # 成交额
-    # url = f"https://www.okx.com/priapi/v5/rubik/web/public/turn-over-rank?countryFilter=1&rank=0&zone=utc8&period={period}&type=USD&t={t}"
-    # 1小时涨幅榜 1H
-    url = f"https://aws.okx.com/priapi/v5/rubik/web/public/up-down-rank?period=1H&zone=utc8&type=USDT&countryFilter=1&rank=0"
-    # 当天涨幅榜 1D
-    # url = f"https://aws.okx.com/priapi/v5/rubik/web/public/up-down-rank?period=1D&zone=utc8&type=USDT&countryFilter=1&rank=0&t={t}"
-    # 新币榜
-    # url = f"https://aws.okx.com/priapi/v5/rubik/web/public/new-coin-rank?zone=utc8&type=USDT&countryFilter=1&rank=0"
-    r = requests.get(url)
-    print(r.url)
-    c = r.json()['data']['data']
-    return c[:20]
-
-def get_coin2():
-    # 爬虫爬取页面，不通过api获取数据
-    url = "https://www.okx.com/zh-hans/markets/explore/notable-change/5min-up"
-    headers = {
-        'User-Agent': "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1"}
-    html = requests.get(url,headers=headers)
-    print(html.text)
-    selector=etree.HTML(html.text)
-    a=selector.xpath('//table/tbody/tr[*]/td[1]/a/text()')
-    b = list(dict.fromkeys(a))[:10]
-    msg = f':joy: 🏆5分钟异动币🏆'
-    for i in b:
-        msg += f"\n`{i}`\n"
-    send_message(msg, chat_id=chat_id)
-    return b
-
-def get_tag(df):
-    df['max_volume'] = df['volume'].rolling(50).max()
-    df['is_max_volume'] = df['volume'] == df['max_volume']
-    df['max_price'] = df['high'].rolling(50).max()
-    df['is_max_price'] = df['high'] == df['max_price']
-    df['min_price'] = df['low'].rolling(50).min()
-    df['is_min_price'] = df['low'] == df['min_price']
-    df['return_0'] = (df['close'] / df['open'] - 1) * 100 + 0.0000001
-    df['is_san_yang'] = False
-    df['is_san_yin'] = False
-    df['is_san_yang'] = (
-            (df['close'].shift(0) >= df['open'].shift(0)) &
-            (df['close'].shift(1) >= df['open'].shift(1)) &
-            (df['close'].shift(2) >= df['open'].shift(2))
-    )
-    df['is_san_yin'] = (
-            (df['close'].shift(0) <= df['open'].shift(0)) &
-            (df['close'].shift(1) <= df['open'].shift(1)) &
-            (df['close'].shift(2) <= df['open'].shift(2))
-    )
-    df.drop(['max_volume', 'min_price', 'max_price'], axis=1, inplace=True)
-    round_dict = {'return_0': 2}
-    df = df.round(round_dict)
-    return df
-
-
 def get_coin_data(coin):
     title = f'🏆{coin}🏆\n'
-    print(title)
     result = marketAPI.get_history_candlesticks(coin, bar=period)['data']
-    df = pd.DataFrame(result)
-    col = ['timestamp', 'open', 'high', 'low', 'close', 'volume', 'amount', '-', '-']
-    df.columns = col
-    df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms').dt.tz_localize('UTC').dt.tz_convert('Asia/Phnom_Penh')
-    columns = ['datetime', 'open', 'high', 'low', 'close', 'volume', 'amount', 'timestamp']
-    df = df[columns].sort_values(['timestamp'], ascending=True)
-    df[columns[1:]] = df[columns[1:]].apply(pd.to_numeric, errors='coerce').fillna(0.0)
-    managed_df = get_tag(df)
-    return_0 = managed_df['return_0'].iloc[0]
-    dt = managed_df['datetime'].iloc[-1]
-    print(managed_df[90:])
+    print(result)
+    print("涨跌幅")
+    close = result[0][4]
+    time_stamp = int(result[0][0]) / 1000
+    x = format_time(time_stamp, tz=7)
+    y = format_time(time_stamp, tz=0)
+    print('本地时间：', x)
+    print('UTC时间：', y)
 
-    if managed_df['is_san_yang'].iloc[-1] == 1:
-        print("三连阳")
-        msg = f'👺三连阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+    print("巨大成交量")
+    volume_list = [v[6] for v in result]
+    v0 = volume_list[0]
+    vmax = max(volume_list[:50])
+    if v0 == vmax:
+        msg = f'🈵🈯成交量屎前巨大 {title}<strike>🚦🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['is_san_yang'].iloc[-1] == 1:
-        print("三连阴")
-        msg = f'👺三连阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+    print("连续向上或向下")
+    return_0 = (float(result[0][4]) / float(result[0][1]) - 1) * 100
+    return_1 = (float(result[1][4]) / float(result[1][1]) - 1) * 100
+    return_2 = (float(result[2][4]) / float(result[2][1]) - 1) * 100
+    return_now = round(return_0, 2)
+    if return_0 <= 0 and return_1 <= 0 and return_2 <= 0:
+        msg = f'📉3连续阴 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x}'
+        send_message(msg, chat_id=chat_id)
+    if return_0 >= 0 and return_1 >= 0 and return_2 >= 0:
+        msg = f'📈3连阳 {title} 🚦涨跌幅:{return_now} 🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['is_max_price'].iloc[-1] == 1:
-        print("最高价")
-        msg = f'👺最高价 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+    print("同比成交量")
+    volume_0 = round(float(result[0][5]) / float(result[1][5]), 2)
+    volume_1 = round(float(result[0][5]) / float(result[2][5]), 2)
+    volume_x = max(volume_0, volume_1)
+    print(volume_0)
+    print(volume_1)
+    if volume_x > 7:
+        if return_0 > 0:
+            msg = f'💹成交量 {title}<strike>🚦成交量超倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x}'
+        else:
+            msg = f'💢成交量 {title}<strike>🚦成交量超倍</strike> {volume_x} <i>☘️涨跌幅:{return_now}</i> 🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['is_min_price'].iloc[-1] == 1:
-        print("最低价")
-        msg = f'👺最低价 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+    print("最高收盘价")
+    close_list = [v[6] for v in result]
+    c0 = close_list[0]
+    cmax = max(close_list)
+    if c0 == cmax:
+        msg = f'👺最高收盘价 {title} 🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['is_max_volume'].iloc[-1] == 1:
-        print("最大量")
-        msg = f'👺最大量 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+    print("最低收盘价")
+    close_list = [v[6] for v in result]
+    c0 = close_list[0]
+    cmax = min(close_list)
+    if c0 == cmax:
+        msg = f'👺最低收盘价 {title} 🍄当前价:{close} \n本地时间:{x}'
         send_message(msg, chat_id=chat_id)
-
-    if managed_df['return_0'].iloc[-1] >= 2:
-        print("大阳柱")
-        msg = f'👺大阳柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
-        send_message(msg, chat_id=chat_id)
-
-    if managed_df['return_0'].iloc[-1] <= -2:
-        print("大阴柱")
-        msg = f'👺大阴柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
-        send_message(msg, chat_id=chat_id)
-    return df
-
 
 if __name__ == '__main__':
     api_key = "ff633c9f-eeb1-4073-bfbc-de5a93af409c"
@@ -274,8 +210,7 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    # coins = get_coin()
-    coins = ['BTC-USDT','AUCTION-USDT']
+    coins = ['BTC-USDT','AUCTION-USDT','W-USDT','ZETA-USDT','NEIRO-USDT']
     print(coins)
     for coin in coins:
         get_coin_data(coin)
