@@ -23,7 +23,7 @@ pd.set_option('display.max_colwidth', 1000)
 '''
 t = int(time.time())
 period = '15m'
-chat_id = "0002086380388"
+chat_id = "-1002086380388"
 GET = "GET"
 POST = "POST"
 API_URL = 'https://www.okx.com'
