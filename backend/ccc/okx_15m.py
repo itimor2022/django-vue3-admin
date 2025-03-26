@@ -287,6 +287,6 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    coins = ['BTC-USDT', 'ETH-USDT', 'AUCTION-USDT', 'W-USDT']
+    coins = ['BTC-USDT', 'ETH-USDT', 'SOL-USDT']
     for coin in coins:
         get_coin_data(coin)
