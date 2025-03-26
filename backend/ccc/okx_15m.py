@@ -180,7 +180,7 @@ def get_coin2():
     selector=etree.HTML(html.text)
     a=selector.xpath('//table/tbody/tr[*]/td[1]/a/text()')
     b = list(dict.fromkeys(a))[:10]
-    msg = f':joy: 🏆5分钟异动币🏆'
+    msg = f'🏆5分钟异动币🏆'
     for i in b:
         msg += f"\n`{i}`\n"
     send_message(msg, chat_id=chat_id)
