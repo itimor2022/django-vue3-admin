@@ -278,6 +278,18 @@ def get_coin_data(coin):
         print("均线趋势")
         msg = f'👺均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
+
+    df = managed_df[:10]
+    if len(df.loc[df.return_0 > 0]) >= 7:
+        print("7小阳")
+        msg = f'👺7小阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        send_message(msg, chat_id=chat_id)
+    if len(df.loc[df.return_0 < 0]) >= 7:
+        print("7小阴")
+        msg = f'👺7小阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        send_message(msg, chat_id=chat_id)
+    print(df)
+
     return df
 
 
@@ -287,6 +299,6 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    coins = ['BTC-USDT', 'ETH-USDT', 'SOL-USDT']
+    coins = ['AUCTION-USDT', 'W-USDT']
     for coin in coins:
         get_coin_data(coin)
