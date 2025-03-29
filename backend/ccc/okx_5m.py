@@ -219,7 +219,7 @@ def get_tag(df):
 
 
 def get_coin_data(coin):
-    title = f'🏆{period} {coin}🏆\n'
+    title = f'🎲{period} {coin}🎲\n'
     print(coin)
     print(period)
     result = marketAPI.get_history_candlesticks(coin, bar=period)['data']
@@ -240,53 +240,53 @@ def get_coin_data(coin):
 
     if managed_df['is_san_yang'].iloc[0] == 1:
         print("三连阳")
-        msg = f'👺三连阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        msg = f'🥃三连阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_san_yang'].iloc[0] == 1:
         print("三连阴")
-        msg = f'👺三连阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        msg = f'🍭三连阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_max_price'].iloc[0] == 1:
         print("最高价")
-        msg = f'👺最高价 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        msg = f'☘️最高价 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_min_price'].iloc[0] == 1:
         print("最低价")
-        msg = f'👺最低价 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        msg = f'🐥最低价 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_max_volume'].iloc[0] == 1:
         print("最大量")
-        msg = f'👺最大量 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        msg = f'🦷最大量 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['return_0'].iloc[0] >= 2:
         print("大阳柱")
-        msg = f'👺大阳柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        msg = f'🤡大阳柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['return_0'].iloc[0] <= -2:
         print("大阴柱")
-        msg = f'👺大阴柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        msg = f'🥶大阴柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['ma5_ma20_x'].iloc[1] > 0.015 and managed_df['ma5_ma20_x'].iloc[1] == \
             managed_df['max_ma5_ma20_x'].iloc[0]:
         print("均线趋势")
-        msg = f'👺均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        msg = f'😈均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     df = managed_df[:10]
     if len(df.loc[df.return_0 > 0]) >= 7:
         print("7小阳")
-        msg = f'👺7小阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        msg = f'💒7小阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
     if len(df.loc[df.return_0 < 0]) >= 7:
         print("7小阴")
-        msg = f'👺7小阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        msg = f'🎁7小阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
     print(df)
 
