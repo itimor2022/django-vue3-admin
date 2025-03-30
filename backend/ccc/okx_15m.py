@@ -239,13 +239,13 @@ def get_coin_data(coin):
     print(managed_df)
 
     if managed_df['is_san_yang'].iloc[0] == 1:
-        print("三连阳")
-        msg = f'🥃三连阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        print("3连阳")
+        msg = f'🥃3连阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_san_yang'].iloc[0] == 1:
-        print("三连阴")
-        msg = f'🍭三连阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        print("3连阴")
+        msg = f'🍭3连阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_max_price'].iloc[0] == 1:
