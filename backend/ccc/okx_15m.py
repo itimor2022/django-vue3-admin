@@ -243,7 +243,7 @@ def get_coin_data(coin):
         msg = f'🥃3连阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['is_san_yang'].iloc[0] == 1:
+    if managed_df['is_san_yin'].iloc[0] == 1:
         print("3连阴")
         msg = f'🍭3连阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
@@ -299,6 +299,6 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    coins = ['BTC-USDT']
+    coins = ['BTC-USDT', 'AUCTION-USDT']
     for coin in coins:
         get_coin_data(coin)

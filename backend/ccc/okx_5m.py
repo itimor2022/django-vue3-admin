@@ -247,7 +247,7 @@ def get_coin_data(coin):
         msg = f'🥃5连阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['is_san_yang'].iloc[0] == 1:
+    if managed_df['is_san_yin'].iloc[0] == 1:
         print("5连阴")
         msg = f'🍭5连阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
