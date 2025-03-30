@@ -279,7 +279,7 @@ def get_coin_data(coin):
         msg = f'😈均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    df = managed_df[:10]
+    df = managed_df[:9]
     if len(df.loc[df.return_0 > 0]) >= 7:
         print("7小阳")
         msg = f'💒7小阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
