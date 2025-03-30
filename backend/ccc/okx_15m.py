@@ -263,12 +263,12 @@ def get_coin_data(coin):
         msg = f'🦷最大量 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['return_0'].iloc[0] >= 2:
+    if managed_df['return_0'].iloc[0] >= 0.5:
         print("大阳柱")
         msg = f'🤡大阳柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['return_0'].iloc[0] <= -2:
+    if managed_df['return_0'].iloc[0] <= -0.5:
         print("大阴柱")
         msg = f'🥶大阴柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
@@ -299,6 +299,6 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    coins = ['AUCTION-USDT', 'W-USDT']
+    coins = ['BTC-USDT']
     for coin in coins:
         get_coin_data(coin)
