@@ -235,7 +235,7 @@ def get_coin_data(coin):
     df['max_ma5_ma20_x'] = df['ma5_ma20_x'].rolling(10).max()
     managed_df = df.sort_values(['timestamp'], ascending=False)
     return_0 = managed_df['return_0'].iloc[0]
-    dt = managed_df['datetime'].iloc[0]
+    dt = managed_df['datetime'].iloc[0].split('07:00')[0]
     print(managed_df)
 
     if managed_df['is_san_yang'].iloc[0] == 1:
@@ -275,12 +275,12 @@ def get_coin_data(coin):
 
     if managed_df['ma5_ma20_x'].iloc[0] > 15:
         print("均线趋势")
-        msg = f'☢️☢️☢️均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        msg = f'☢️☢️☢️均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt} \n {managed_df["ma5_ma20_x"].iloc[0]}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['ma5_ma20_x'].iloc[0] > 25:
+    if managed_df['ma5_ma20_x'].iloc[0] > 20:
         print("均线趋势")
-        msg = f'☢️☢️☢️☢️☢️☢️均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        msg = f'☢️☢️☢️☢️☢️☢️均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt} \n {managed_df["ma5_ma20_x"].iloc[0]}'
         send_message(msg, chat_id=chat_id)
 
     df = managed_df[:9]
