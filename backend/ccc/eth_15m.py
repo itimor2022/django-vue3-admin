@@ -275,12 +275,12 @@ def get_coin_data(coin):
 
     if managed_df['ma5_ma20_x'].iloc[0] > 35:
         print("均线趋势")
-        msg = f'☢️☢️☢️均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt} \n {managed_df["ma5_ma20_x"].iloc[0]}'
+        msg = f'☢️☢️☢️均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt} \n趋势值：{managed_df["ma5_ma20_x"].iloc[0]}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['ma5_ma20_x'].iloc[0] > 40:
         print("均线趋势")
-        msg = f'☢️☢️☢️☢️☢️☢️均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt} \n {managed_df["ma5_ma20_x"].iloc[0]}'
+        msg = f'☢️☢️☢️☢️☢️☢️均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt} \n趋势值：{managed_df["ma5_ma20_x"].iloc[0]}'
         send_message(msg, chat_id=chat_id)
 
     df = managed_df[:9]
