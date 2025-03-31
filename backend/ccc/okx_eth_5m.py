@@ -21,7 +21,7 @@ pd.set_option('display.max_colwidth', 1000)
 '''para
 '''
 t = int(time.time())
-period = '15m'
+period = '5m'
 chat_id = "-1002086380388"
 GET = "GET"
 POST = "POST"
