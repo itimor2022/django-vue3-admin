@@ -213,7 +213,7 @@ def get_tag(df):
     df['ma5_ma20_x'] = abs(df['ma5'] / df['ma20'] - 1) * 10000
 
     df.drop(['max_volume', 'min_price', 'max_price'], axis=1, inplace=True)
-    round_dict = {'return_0': 2}
+    round_dict = {'return_0': 2, 'ma5_ma20_x': 2}
     df = df.round(round_dict)
     return df
 
@@ -232,7 +232,6 @@ def get_coin_data(coin):
     df = df[columns].sort_values(['timestamp'], ascending=True)
     df[columns[1:]] = df[columns[1:]].apply(pd.to_numeric, errors='coerce').fillna(0.0)
     df = get_tag(df)
-    df['max_ma5_ma20_x'] = df['ma5_ma20_x'].rolling(10).max()
     managed_df = df.sort_values(['timestamp'], ascending=False)
     return_0 = managed_df['return_0'].iloc[0]
     dt = str(managed_df['datetime'].iloc[0]).split('07:00')[0]
