@@ -210,7 +210,7 @@ def get_tag(df):
     ma_list = [5, 10, 20]
     for ma in ma_list:
         df['ma' + str(ma)] = df["close"].ewm(span=ma, adjust=False).mean()
-    df['ma5_ma20_x'] = abs(df['ma5'] / df['ma20'] - 1)
+    df['ma5_ma20_x'] = abs(df['ma5'] / df['ma20'] - 1) * 10000
 
     df.drop(['max_volume', 'min_price', 'max_price'], axis=1, inplace=True)
     round_dict = {'return_0': 2}
@@ -273,10 +273,14 @@ def get_coin_data(coin):
         msg = f'🥶大阴柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['ma5_ma20_x'].iloc[1] > 0.015 and managed_df['ma5_ma20_x'].iloc[1] == \
-            managed_df['max_ma5_ma20_x'].iloc[0]:
+    if managed_df['ma5_ma20_x'].iloc[0] > 15:
         print("均线趋势")
-        msg = f'😈均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        msg = f'☢️☢️☢️均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        send_message(msg, chat_id=chat_id)
+
+    if managed_df['ma5_ma20_x'].iloc[0] > 25:
+        print("均线趋势")
+        msg = f'☢️☢️☢️☢️☢️☢️均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     df = managed_df[:9]
@@ -299,6 +303,6 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    coins = ['BTC-USDT', 'AUCTION-USDT']
+    coins = ['BTC-USDT', 'ETH-USDT']
     for coin in coins:
         get_coin_data(coin)
