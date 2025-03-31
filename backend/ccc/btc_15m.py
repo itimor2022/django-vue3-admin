@@ -21,7 +21,7 @@ pd.set_option('display.max_colwidth', 1000)
 '''para
 '''
 t = int(time.time())
-period = '5m'
+period = '15m'
 chat_id = "-1002086380388"
 GET = "GET"
 POST = "POST"
@@ -199,16 +199,12 @@ def get_tag(df):
     df['is_san_yang'] = (
             (df['close'].shift(0) >= df['open'].shift(0)) &
             (df['close'].shift(1) >= df['open'].shift(1)) &
-            (df['close'].shift(1) >= df['open'].shift(2)) &
-            (df['close'].shift(1) >= df['open'].shift(3)) &
-            (df['close'].shift(2) >= df['open'].shift(4))
+            (df['close'].shift(2) >= df['open'].shift(2))
     )
     df['is_san_yin'] = (
             (df['close'].shift(0) <= df['open'].shift(0)) &
             (df['close'].shift(1) <= df['open'].shift(1)) &
-            (df['close'].shift(1) <= df['open'].shift(2)) &
-            (df['close'].shift(1) <= df['open'].shift(3)) &
-            (df['close'].shift(2) <= df['open'].shift(4))
+            (df['close'].shift(2) <= df['open'].shift(2))
     )
     # ema
     ma_list = [5, 10, 20]
@@ -223,7 +219,7 @@ def get_tag(df):
 
 
 def get_coin_data(coin):
-    title = f'🎲{period} {coin}🎲\n'
+    title = f'🏆{period} {coin}🏆\n'
     print(coin)
     print(period)
     result = marketAPI.get_history_candlesticks(coin, bar=period)['data']
@@ -243,13 +239,13 @@ def get_coin_data(coin):
     print(managed_df)
 
     if managed_df['is_san_yang'].iloc[0] == 1:
-        print("5连阳")
-        msg = f'🥃5连阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        print("3连阳")
+        msg = f'🥃3连阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_san_yin'].iloc[0] == 1:
-        print("5连阴")
-        msg = f'🍭5连阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        print("3连阴")
+        msg = f'🍭3连阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_max_price'].iloc[0] == 1:
@@ -267,12 +263,12 @@ def get_coin_data(coin):
         msg = f'🦷最大量 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['return_0'].iloc[0] >= 2:
+    if managed_df['return_0'].iloc[0] >= 0.5:
         print("大阳柱")
         msg = f'🤡大阳柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['return_0'].iloc[0] <= -2:
+    if managed_df['return_0'].iloc[0] <= -0.5:
         print("大阴柱")
         msg = f'🥶大阴柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
@@ -307,6 +303,6 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    coins = ['BTC-USDT', 'ETH-USDT']
+    coins = ['BTC-USDT']
     for coin in coins:
         get_coin_data(coin)

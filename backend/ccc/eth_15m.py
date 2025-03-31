@@ -219,7 +219,7 @@ def get_tag(df):
 
 
 def get_coin_data(coin):
-    title = f'🏆{period} {coin}🏆\n'
+    title = f'🎲{period} {coin}🎲\n'
     print(coin)
     print(period)
     result = marketAPI.get_history_candlesticks(coin, bar=period)['data']
@@ -239,13 +239,13 @@ def get_coin_data(coin):
     print(managed_df)
 
     if managed_df['is_san_yang'].iloc[0] == 1:
-        print("3连阳")
-        msg = f'🥃3连阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        print("5连阳")
+        msg = f'🥃5连阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_san_yin'].iloc[0] == 1:
-        print("3连阴")
-        msg = f'🍭3连阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        print("5连阴")
+        msg = f'🍭5连阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_max_price'].iloc[0] == 1:
@@ -263,22 +263,22 @@ def get_coin_data(coin):
         msg = f'🦷最大量 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['return_0'].iloc[0] >= 0.5:
+    if managed_df['return_0'].iloc[0] >= 2:
         print("大阳柱")
         msg = f'🤡大阳柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['return_0'].iloc[0] <= -0.5:
+    if managed_df['return_0'].iloc[0] <= -2:
         print("大阴柱")
         msg = f'🥶大阴柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['ma5_ma20_x'].iloc[0] > 15:
+    if managed_df['ma5_ma20_x'].iloc[0] > 30:
         print("均线趋势")
         msg = f'☢️☢️☢️均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['ma5_ma20_x'].iloc[0] > 25:
+    if managed_df['ma5_ma20_x'].iloc[0] > 35:
         print("均线趋势")
         msg = f'☢️☢️☢️☢️☢️☢️均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
@@ -303,6 +303,6 @@ if __name__ == '__main__':
     passphrase = "Jay@541430183"
     flag = '1'
     marketAPI = MarketAPI(api_key, secret_key, passphrase, False, flag)
-    coins = ['BTC-USDT', 'ETH-USDT']
+    coins = ['ETH-USDT']
     for coin in coins:
         get_coin_data(coin)
