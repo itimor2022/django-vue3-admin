@@ -282,14 +282,14 @@ def get_coin_data(coin):
         msg = f'☢️☢️☢️☢️☢️☢️均线趋势 {title} 🍄涨幅:{return_0}% \n本地时间:{dt} \n趋势值：{managed_df["ma5_ma20_x"].iloc[0]}'
         send_message(msg, chat_id=chat_id)
 
-    df = managed_df[:9]
-    if len(df.loc[df.return_0 > 0]) >= 7:
-        print("7小阳")
-        msg = f'💒7小阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+    df = managed_df[:6]
+    if len(df.loc[df.return_0 > 0]) >= 5:
+        print("5小阳")
+        msg = f'💒5小阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
-    if len(df.loc[df.return_0 < 0]) >= 7:
-        print("7小阴")
-        msg = f'🎁7小阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+    if len(df.loc[df.return_0 < 0]) >= 5:
+        print("5小阴")
+        msg = f'🎁5小阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
     print(df)
 

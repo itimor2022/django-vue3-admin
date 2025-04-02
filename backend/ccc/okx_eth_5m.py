@@ -187,7 +187,7 @@ def get_coin2():
     return b
 
 def get_tag(df):
-    df['max_volume'] = df['volume'].rolling(50).max()
+    df['max_volume'] = df['volume'].rolling(20).max()
     df['is_max_volume'] = df['volume'] == df['max_volume']
     df['max_price'] = df['high'].rolling(50).max()
     df['is_max_price'] = df['high'] == df['max_price']
@@ -200,13 +200,15 @@ def get_tag(df):
             (df['close'].shift(0) >= df['open'].shift(0)) &
             (df['close'].shift(1) >= df['open'].shift(1)) &
             (df['close'].shift(2) >= df['open'].shift(2)) &
-            (df['close'].shift(3) >= df['open'].shift(3))
+            (df['close'].shift(2) >= df['open'].shift(3)) &
+            (df['close'].shift(3) >= df['open'].shift(4))
     )
     df['is_san_yin'] = (
             (df['close'].shift(0) <= df['open'].shift(0)) &
             (df['close'].shift(1) <= df['open'].shift(1)) &
             (df['close'].shift(2) <= df['open'].shift(2)) &
-            (df['close'].shift(3) <= df['open'].shift(3))
+            (df['close'].shift(2) <= df['open'].shift(3)) &
+            (df['close'].shift(3) <= df['open'].shift(4))
     )
     # ema
     ma_list = [5, 10, 20]
@@ -241,13 +243,13 @@ def get_coin_data(coin):
     print(managed_df)
 
     if managed_df['is_san_yang'].iloc[0] == 1:
-        print("3连阳")
-        msg = f'🥃3连阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        print("5连阴")
+        msg = f'🥃5连阳 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_san_yin'].iloc[0] == 1:
-        print("3连阴")
-        msg = f'🍭3连阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
+        print("5连阴")
+        msg = f'🍭5连阴 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_max_price'].iloc[0] == 1:
@@ -265,12 +267,12 @@ def get_coin_data(coin):
         msg = f'🦷最大量 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['return_0'].iloc[0] >= 0.5:
+    if managed_df['return_0'].iloc[0] >= 0.4:
         print("大阳柱")
         msg = f'🤡大阳柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['return_0'].iloc[0] <= -0.5:
+    if managed_df['return_0'].iloc[0] <= -0.4:
         print("大阴柱")
         msg = f'🥶大阴柱 {title} 🍄涨幅:{return_0}% \n本地时间:{dt}'
         send_message(msg, chat_id=chat_id)
