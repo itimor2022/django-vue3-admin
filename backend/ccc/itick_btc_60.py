@@ -83,41 +83,42 @@ def get_coin_data(coin):
     df = get_tag(df)
     managed_df = df.sort_values(['timestamp'], ascending=False)
     return_0 = managed_df['return_0'].iloc[0]
+    close = managed_df['close'].iloc[0]
     print(managed_df)
 
     if managed_df['is_san_yang'].iloc[0] == 1:
         print("连阴")
-        msg = f'🥃连阳 {title} 🍄涨幅:{return_0}%'
+        msg = f'🥃连阳 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_san_yin'].iloc[0] == 1:
         print("连阴")
-        msg = f'🍭连阴 {title} 🍄涨幅:{return_0}%'
+        msg = f'🍭连阴 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_max_price'].iloc[0] == 1:
         print("最高价")
-        msg = f'☘️最高价 {title} 🍄涨幅:{return_0}%'
+        msg = f'☘️最高价 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_min_price'].iloc[0] == 1:
         print("最低价")
-        msg = f'🐥最低价 {title} 🍄涨幅:{return_0}%'
+        msg = f'🐥最低价 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_max_volume'].iloc[0] == 1:
         print("最大量")
-        msg = f'🦷最大量 {title} 🍄涨幅:{return_0}%'
+        msg = f'🦷最大量 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['return_0'].iloc[0] >= 0.5:
         print("大阳柱")
-        msg = f'🤡大阳柱 {title} 🍄涨幅:{return_0}%'
+        msg = f'🤡大阳柱 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['return_0'].iloc[0] <= -0.5:
         print("大阴柱")
-        msg = f'🥶大阴柱 {title} 🍄涨幅:{return_0}%'
+        msg = f'🥶大阴柱 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
     return df
