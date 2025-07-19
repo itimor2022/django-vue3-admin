@@ -23,11 +23,11 @@ def send_message(msg, chat_id="-4591709428"):
 
 
 def get_tag(df):
-    df['max_volume'] = df['volume'].rolling(20).max()
+    df['max_volume'] = df['volume'].rolling(6).max()
     df['is_max_volume'] = df['volume'] == df['max_volume']
-    df['max_price'] = df['high'].rolling(50).max()
+    df['max_price'] = df['high'].rolling(6).max()
     df['is_max_price'] = df['high'] == df['max_price']
-    df['min_price'] = df['low'].rolling(50).min()
+    df['min_price'] = df['low'].rolling(6).min()
     df['is_min_price'] = df['low'] == df['min_price']
     df['return_0'] = (df['close'] / df['open'] - 1) * 100 + 0.0000001
     df['is_san_yang'] = False
