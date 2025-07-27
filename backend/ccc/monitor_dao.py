@@ -51,21 +51,20 @@ def check_domain(domain):
         url = f"{scheme}{domain}"
         try:
             response = requests.get(url, timeout=TIMEOUT, allow_redirects=True)
-            if response.status_code == 200:
-                return True
+            return response.status_code
         except (requests.ConnectionError, requests.Timeout, requests.RequestException) as e:
             logging.warning(f"检测 {url} 失败: {str(e)}")
             continue
 
-    return False
+    return 200
 
 
-def send_telegram_alert(domain):
+def send_telegram_alert(domain, code, pan):
     """通过 Telegram Bot 发送报警消息"""
     message = (
-        f"🚨 域名监控警报 🚨\n\n"
+        f"🚨 {pan} 域名监控警报 🚨\n\n"
         f"域名: {domain}\n"
-        f"状态: 无法访问\n"
+        f"状态: {code}\n"
         f"时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
         f"请立即检查!"
     )
@@ -91,12 +90,16 @@ def main():
     logging.info("域名监控服务启动...")
     last_domain = get_last_domain_from_file("/www/server/panel/vhost/nginx/qgm.dao.conf")
     print("文件中的最后一个域名:", last_domain)
-    logging.info(f"正在检测 {last_domain}...")
-    if not check_domain(last_domain):
-        logging.error(f"域名 {last_domain} 无法访问!")
-        send_telegram_alert(last_domain)
+    domains = [last_domain, "154.202.156.162:701/", '154.202.156.172:701/skl001']
+    pan = '强国'
+    for domain in domains:
+        logging.info(f"正在检测 {domain}...")
+        code = check_domain(domain)
+
+        if code not in [200, 404]:
+            logging.error(f"域名 {domain} 无法访问!")
+            send_telegram_alert(domain, code, pan)
 
 
 if __name__ == "__main__":
     main()
-    # send_telegram_alert('xxx')
