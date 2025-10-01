@@ -1,7 +1,7 @@
 import requests
 
 # 替换成你的 Bot Token
-BOT_TOKEN = "7114302389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
+BOT_TOKEN = "8444348700:AAGqkeUUuB_0rI_4qIaJxrTylpRGh020wU0"
 
 
 def get_chat_id():

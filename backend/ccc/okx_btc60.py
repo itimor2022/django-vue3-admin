@@ -8,11 +8,11 @@ pd.set_option('display.max_rows', 1000)
 pd.set_option('display.width', 1000)
 pd.set_option('display.max_colwidth', 1000)
 
-chat_id = "-1002086380388"
+chat_id = "-4966987679"
 
-def send_message(msg, chat_id="-4591709428"):
-    token1 = "7114302"
-    token2 = "389:AAHaFEzUwXj7QC1A20qwi_tJGlkRtP6FOlg"
+def send_message(msg):
+    token1 = "844434"
+    token2 = "8700:AAGqkeUUuB_0rI_4qIaJxrTylpRGh020wU0"
     url = f"https://api.telegram.org/bot{token1}{token2}/sendMessage?chat_id={chat_id}&text={msg}&parse_mode=HTML"
     r = requests.get(url)
     print(r.json())
@@ -101,39 +101,39 @@ def get_coin_data(coin="BTC-USDT"):
     # 触发信号
     if latest['is_yang_two']:
         msg = f'🥃2连阳 {title} 📈涨幅:{return_0}% 👁当前价:{close}'
-        send_message(msg, chat_id=chat_id)
+        send_message(msg)
 
     if latest['is_yin_two']:
         msg = f'🍭2连阴 {title} 📉涨幅:{return_0}% 👁当前价:{close}'
-        send_message(msg, chat_id=chat_id)
+        send_message(msg)
 
     if latest['is_yang_three']:
         msg = f'🥃3连阳 {title} 📈涨幅:{return_0}% 👁当前价:{close}'
-        send_message(msg, chat_id=chat_id)
+        send_message(msg)
 
     if latest['is_yin_three']:
         msg = f'🍭3连阴 {title} 📉涨幅:{return_0}% 👁当前价:{close}'
-        send_message(msg, chat_id=chat_id)
+        send_message(msg)
 
     if latest['is_max_price']:
         msg = f'☘️最高价 {title} 📈涨幅:{return_0}% 👁当前价:{close}'
-        send_message(msg, chat_id=chat_id)
+        send_message(msg)
 
     if latest['is_min_price']:
         msg = f'🐥最低价 {title} 📉涨幅:{return_0}% 👁当前价:{close}'
-        send_message(msg, chat_id=chat_id)
+        send_message(msg)
 
     if latest['is_max_volume']:
         msg = f'🦷最大量 {title} 📊涨幅:{return_0}% 👁当前价:{close}'
-        send_message(msg, chat_id=chat_id)
+        send_message(msg)
 
     if return_0 >= 0.5:
         msg = f'🤡大阳柱 {title} 📈涨幅:{return_0}% 👁当前价:{close}'
-        send_message(msg, chat_id=chat_id)
+        send_message(msg)
 
     if return_0 <= -0.5:
         msg = f'🥶大阴柱 {title} 📉涨幅:{return_0}% 👁当前价:{close}'
-        send_message(msg, chat_id=chat_id)
+        send_message(msg)
 
     return df
 
