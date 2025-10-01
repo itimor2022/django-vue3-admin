@@ -29,16 +29,29 @@ def get_tag(df):
     df['is_max_price'] = df['high'] == df['max_price']
     df['min_price'] = df['low'].rolling(8).min()
     df['is_min_price'] = df['low'] == df['min_price']
-    df['return_0'] = (df['close'] / df['open'] - 1) * 100 + 0.0000001
-    df['is_san_yang'] = False
-    df['is_san_yin'] = False
-    df['is_san_yang'] = (
-            (df['close'].shift(0) >= df['open'].shift(0)) &
-            (df['close'].shift(1) >= df['open'].shift(1))
+    eps = 1e-8
+    df['return_0'] = (df['close'] / (df['open'] + eps) - 1) * 100
+    df['is_yang_two'] = False
+    df['is_yin_two'] = False
+    df['is_yang_two'] = (
+            (df['close'].shift(1) >= df['open'].shift(1)) &
+            (df['close'].shift(0) >= df['open'].shift(0))
     )
-    df['is_san_yin'] = (
-            (df['close'].shift(0) <= df['open'].shift(0)) &
-            (df['close'].shift(1) <= df['open'].shift(1))
+    df['is_yin_two'] = (
+            (df['close'].shift(1) <= df['open'].shift(1)) &
+            (df['close'].shift(0) <= df['open'].shift(0))
+    )
+    df['is_yang_three'] = False
+    df['is_yin_three'] = False
+    df['is_yang_three'] = (
+            (df['close'].shift(2) >= df['open'].shift(2)) &
+            (df['close'].shift(1) >= df['open'].shift(1)) &
+            (df['close'].shift(0) >= df['open'].shift(0))
+    )
+    df['is_yin_three'] = (
+            (df['close'].shift(2) <= df['open'].shift(2)) &
+            (df['close'].shift(1) <= df['open'].shift(1)) &
+            (df['close'].shift(0) <= df['open'].shift(0))
     )
 
     # ema
@@ -101,18 +114,29 @@ def get_coin_data(coin):
     df[columns[1:]] = df[columns[1:]].apply(pd.to_numeric, errors='coerce').fillna(0.0)
     df = get_tag(df)
     managed_df = df.sort_values(['timestamp'], ascending=False)
-    return_0 = managed_df['return_0'].iloc[0]
-    close = managed_df['close'].iloc[0]
+    latest = managed_df.iloc[0]
+    return_0 = latest['return_0']
+    close = latest['close']
     print(managed_df)
 
-    if managed_df['is_san_yang'].iloc[0] == 1:
-        print("连阴")
-        msg = f'🥃连阳 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
+    if latest['is_yang_two']:
+        print("2连阳")
+        msg = f'🥃2连阳 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['is_san_yin'].iloc[0] == 1:
-        print("连阴")
-        msg = f'🍭连阴 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
+    if latest['is_yin_two']:
+        print("2连阴")
+        msg = f'🍭2连阴 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
+        send_message(msg, chat_id=chat_id)
+
+    if latest['is_yang_three']:
+        print("3连阳")
+        msg = f'🥃3连阳 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
+        send_message(msg, chat_id=chat_id)
+
+    if latest['is_yang_three']:
+        print("3连阴")
+        msg = f'🍭3连阴 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
     if managed_df['is_max_price'].iloc[0] == 1:
@@ -130,12 +154,12 @@ def get_coin_data(coin):
         msg = f'🦷最大量 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['return_0'].iloc[0] >= 0.5:
+    if return_0 >= 0.5:
         print("大阳柱")
         msg = f'🤡大阳柱 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg, chat_id=chat_id)
 
-    if managed_df['return_0'].iloc[0] <= -0.5:
+    if return_0 <= -0.5:
         print("大阴柱")
         msg = f'🥶大阴柱 {title} 🍄涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg, chat_id=chat_id)
