@@ -134,7 +134,7 @@ def get_coin_data(coin="BTC-USDT"):
     if return_0 <= -0.5:
         msg = f'🥶大阴柱 {title} 📉涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg)
-
+    print(df)
     return df
 
 if __name__ == '__main__':
