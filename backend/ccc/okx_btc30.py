@@ -83,8 +83,7 @@ def get_coin_data(coin="BTC-USDT"):
     # OKX返回是 [ts, o, h, l, c, vol, volCcy, volCcyQuote, confirm]
     data = result['data']
     df = pd.DataFrame(data, columns=["timestamp", "open", "high", "low", "close", "volume", "-", "-", "-"])
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms').dt.tz_localize('UTC').dt.tz_convert('Asia/Phnom_Penh')
-
+    df['timestamp'] = pd.to_datetime(df['timestamp'].astype(float), unit='ms').dt.tz_localize('UTC').dt.tz_convert('Asia/Phnom_Penh')
     # 转换数据类型
     df[['open','high','low','close','volume']] = df[['open','high','low','close','volume']].astype(float)
 
