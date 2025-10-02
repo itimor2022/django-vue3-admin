@@ -96,6 +96,7 @@ def get_coin_data(coin="BTC-USDT"):
 
     return_0 = latest['return_0']
     close = latest['close']
+    timestamp = latest['timestamp']
 
     # 触发信号
     if latest['is_yang_two']:
@@ -133,6 +134,9 @@ def get_coin_data(coin="BTC-USDT"):
     if return_0 <= -0.5:
         msg = f'🥶大阴柱 {title} 📉涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg)
+
+    print("*********************--------------*********************")
+    print(timestamp)
     print(df)
     return df
 
