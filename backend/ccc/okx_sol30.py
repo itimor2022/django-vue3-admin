@@ -10,6 +10,7 @@ pd.set_option('display.max_colwidth', 1000)
 
 chat_id = "-4966987679"
 
+
 def send_message(msg):
     token1 = "844434"
     token2 = "8700:AAGqkeUUuB_0rI_4qIaJxrTylpRGh020wU0"
@@ -17,9 +18,8 @@ def send_message(msg):
     r = requests.get(url)
     print(r.json())
 
+
 def get_tag(df):
-    df['max_volume'] = df['volume'].rolling(8).max()
-    df['is_max_volume'] = df['volume'] == df['max_volume']
     df['max_price'] = df['high'].rolling(8).max()
     df['is_max_price'] = df['high'] == df['max_price']
     df['min_price'] = df['low'].rolling(8).min()
@@ -29,28 +29,23 @@ def get_tag(df):
 
     # 连续K线
     df['is_yang_two'] = (
-        (df['close'].shift(1) >= df['open'].shift(1)) &
-        (df['close'].shift(0) >= df['open'].shift(0))
+            (df['close'].shift(1) >= df['open'].shift(1)) &
+            (df['close'].shift(0) >= df['open'].shift(0))
     )
     df['is_yin_two'] = (
-        (df['close'].shift(1) <= df['open'].shift(1)) &
-        (df['close'].shift(0) <= df['open'].shift(0))
+            (df['close'].shift(1) <= df['open'].shift(1)) &
+            (df['close'].shift(0) <= df['open'].shift(0))
     )
     df['is_yang_three'] = (
-        (df['close'].shift(2) >= df['open'].shift(2)) &
-        (df['close'].shift(1) >= df['open'].shift(1)) &
-        (df['close'].shift(0) >= df['open'].shift(0))
+            (df['close'].shift(2) >= df['open'].shift(2)) &
+            (df['close'].shift(1) >= df['open'].shift(1)) &
+            (df['close'].shift(0) >= df['open'].shift(0))
     )
     df['is_yin_three'] = (
-        (df['close'].shift(2) <= df['open'].shift(2)) &
-        (df['close'].shift(1) <= df['open'].shift(1)) &
-        (df['close'].shift(0) <= df['open'].shift(0))
+            (df['close'].shift(2) <= df['open'].shift(2)) &
+            (df['close'].shift(1) <= df['open'].shift(1)) &
+            (df['close'].shift(0) <= df['open'].shift(0))
     )
-
-    # EMA
-    for ma in [5, 10, 20]:
-        df['ma' + str(ma)] = df["close"].ewm(span=ma, adjust=False).mean()
-    df['ma5_ma20_x'] = abs(df['ma5'] / df['ma20'] - 1) * 10000
 
     # BOLL
     window = 20
@@ -59,17 +54,22 @@ def get_tag(df):
     df['STD'] = df['close'].rolling(window=window).std()
     df['upper'] = df['SMA'] + (df['STD'] * num_of_std)
     df['lower'] = df['SMA'] - (df['STD'] * num_of_std)
+    df['yang_sma_x'] = (df['return_0'] > 0) & (df['open'] < df['SMA']) & (df['close'] > df['SMA'])
+    df['yin_sma_x'] = (df['return_0'] < 0) & (df['close'] < df['SMA']) & (df['open'] > df['SMA'])
+    df['is_high_boll'] = (df['return_0'] > 0) & (df['close'] > df['upper'])
+    df['is_low_boll'] = (df['return_0'] < 0) & (df['low'] < df['lower'])
 
-    df.drop(['max_volume', 'min_price', 'max_price'], axis=1, inplace=True)
-    df = df.round({'return_0': 2, 'ma5_ma20_x': 2, 'close': 2})
+    df.drop(['min_price', 'max_price'], axis=1, inplace=True)
+    df = df.round({'return_0': 2, 'close': 2})
     return df
 
+
 def get_coin_data(coin="BTC-USDT"):
-    title = f'⏰60分钟 {coin}⏰\n'
+    title = f'⏰30分钟 {coin}⏰\n'
     api_url = "https://www.okx.com/api/v5/market/candles"
     params = {
         "instId": coin,
-        "bar": "1H",   # 60分钟
+        "bar": "30m",  # 60分钟
         "limit": "100"
     }
 
@@ -82,13 +82,13 @@ def get_coin_data(coin="BTC-USDT"):
 
     # OKX返回是 [ts, o, h, l, c, vol, volCcy, volCcyQuote, confirm]
     data = result['data']
-    df = pd.DataFrame(data, columns=["timestamp", "open", "high", "low", "close", "volume", "-", "-", "-"])
-    df['timestamp'] = pd.to_datetime(df['timestamp'].astype(float), unit='ms').dt.tz_localize('UTC').dt.tz_convert('Asia/Phnom_Penh')
-
+    df = pd.DataFrame(data, columns=["timestamp", "open", "high", "low", "close", "-", "-", "-", "-"])
+    df['timestamp'] = pd.to_datetime(df['timestamp'].astype(float), unit='ms').dt.tz_localize('UTC').dt.tz_convert(
+        'Asia/Phnom_Penh')
     # 转换数据类型
-    df[['open','high','low','close','volume']] = df[['open','high','low','close','volume']].astype(float)
+    df[['open', 'high', 'low', 'close']] = df[['open', 'high', 'low', 'close']].astype(float)
 
-    columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
+    columns = ['timestamp', 'open', 'high', 'low', 'close']
     df = df[columns].sort_values(['timestamp'], ascending=True)
 
     df = get_tag(df)
@@ -98,6 +98,24 @@ def get_coin_data(coin="BTC-USDT"):
     return_0 = latest['return_0']
     close = latest['close']
     timestamp = latest['timestamp']
+
+    # 触发boll信号,下跌趋势
+    past_low_boll = df[df['is_low_boll']].iloc[-1:]
+    if not past_low_boll.empty:
+        last_close = past_low_boll['close'].values[0]
+        prev_close = df['close'].iloc[-2]
+        if (close < last_close) and (prev_close > last_close):
+            msg = f'⚠️报警: {title} 当前收盘价 {close} 小于上次BOLL下轨触发时的收盘价 {last_close}'
+            send_message(msg)
+
+    # 触发boll信号,上涨趋势
+    past_close_boll = df[df['is_high_boll']].iloc[-1:]
+    if not past_close_boll.empty:
+        last_close = past_close_boll['close'].values[0]
+        prev_close = df['close'].iloc[-2]
+        if (close > last_close) and (prev_close < last_close):
+            msg = f'⚠️报警: {title} 当前收盘价 {close} 大于上次BOLL上轨触发时的收盘价 {last_close}'
+            send_message(msg)
 
     # 触发信号
     if latest['is_yang_two']:
@@ -124,16 +142,12 @@ def get_coin_data(coin="BTC-USDT"):
         msg = f'🐥最低价 {title} 📉涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg)
 
-    if latest['is_max_volume']:
-        msg = f'🦷最大量 {title} 📊涨幅:{return_0}% 👁当前价:{close}'
+    if latest['yang_sma_x']:
+        msg = f'🦷阳柱上穿中线 {title} 📊涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg)
 
-    if return_0 >= 0.5:
-        msg = f'🤡大阳柱 {title} 📈涨幅:{return_0}% 👁当前价:{close}'
-        send_message(msg)
-
-    if return_0 <= -0.5:
-        msg = f'🥶大阴柱 {title} 📉涨幅:{return_0}% 👁当前价:{close}'
+    if latest['yin_sma_x']:
+        msg = f'🦷阴柱下穿中线 {title} 📊涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg)
 
     print("*********************--------------*********************")
@@ -141,6 +155,7 @@ def get_coin_data(coin="BTC-USDT"):
     print(df)
     return df
 
+
 if __name__ == '__main__':
-    code = "BTC-USDT"  # OKX 交易对
+    code = "SOL-USDT"  # OKX 交易对
     get_coin_data(code)

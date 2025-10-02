@@ -157,5 +157,5 @@ def get_coin_data(coin="BTC-USDT"):
 
 
 if __name__ == '__main__':
-    code = "BTC-USDT"  # OKX 交易对
+    code = "ETH-USDT"  # OKX 交易对
     get_coin_data(code)
