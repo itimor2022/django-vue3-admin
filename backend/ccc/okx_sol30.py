@@ -38,7 +38,7 @@ def get_tag(df):
     )
 
     # BOLL
-    window = 20
+    window = 25
     num_of_std = 2
     df['SMA'] = df['close'].rolling(window=window).mean()
     df['STD'] = df['close'].rolling(window=window).std()
