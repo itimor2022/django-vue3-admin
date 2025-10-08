@@ -91,6 +91,7 @@ def get_coin_data(coin="BTC-USDT"):
 
     return_0 = latest['return_0']
     close = latest['close']
+    shadow_lower = latest['shadow_lower']
     timestamp = latest['timestamp']
 
     # 触发boll信号,下跌趋势
@@ -161,7 +162,7 @@ def get_coin_data(coin="BTC-USDT"):
         send_message(msg)
 
     if latest['shadow_lower'] >= 0.51:
-        msg = f'🔥下影线太长: {title} 反弹上涨趋势'
+        msg = f'🔥下影线太长: {title} 📊涨幅:{return_0}% 👁下影线:{shadow_lower}'
         send_message(msg)
 
     print("*********************--------------*********************")
