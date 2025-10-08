@@ -49,14 +49,12 @@ def get_tag(df):
     df['is_high_boll'] = (df['return_0'] > 0) & (df['close'] > df['upper'])
     df['is_low_boll'] = (df['return_0'] < 0) & (df['low'] < df['lower'])
 
-    # 阴线下影线幅度（百分比）
-    df['shadow_lower'] = 0.0
-    mask_yin = df['close'] < df['open']
-    df.loc[mask_yin, 'shadow_lower'] = (df.loc[mask_yin, 'open'] - df.loc[mask_yin, 'low']) / df.loc[mask_yin, 'open'] * 100
-    df['shadow_lower'] = df['shadow_lower'].round(2)
+    # 下影线幅度（百分比）—— 适用于阳线和阴线
+    df['shadow_lower'] = ((df[['open', 'close']].min(axis=1) / df['low']) - 1) * 100
+    df['shadow_lower'] = df['shadow_lower'].clip(lower=0).round(2)
 
     df.drop(['min_price', 'max_price'], axis=1, inplace=True)
-    df = df.round({'return_0': 2, 'close': 2})
+    df = df.round({'return_0': 2, 'close': 2, 'shadow_lower': 2})
     return df
 
 
@@ -162,7 +160,7 @@ def get_coin_data(coin="BTC-USDT"):
         msg = f'🦷阴柱下穿中线 {title} 📊涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg)
 
-    if latest['shadow_lower'] >= 0.5:
+    if latest['shadow_lower'] >= 0.51:
         msg = f'🔥下影线太长: {title} 反弹上涨趋势'
         send_message(msg)
 
