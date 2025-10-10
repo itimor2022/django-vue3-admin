@@ -7,7 +7,7 @@ pd.set_option('display.max_rows', 1000)
 pd.set_option('display.width', 1000)
 pd.set_option('display.max_colwidth', 1000)
 
-chat_id = "-4966987679"
+chat_id = "-4850300375"
 
 
 def send_message(msg):
@@ -58,11 +58,11 @@ def get_tag(df):
 
 
 def get_coin_data(coin="BTC-USDT"):
-    title = f'⏰30分钟 {coin}⏰\n'
+    title = f'⏰10分钟 {coin}⏰\n'
     api_url = "https://www.okx.com/api/v5/market/candles"
     params = {
         "instId": coin,
-        "bar": "30m",  # 60分钟
+        "bar": "15m",  # 60分钟
         "limit": "100"
     }
 
@@ -93,33 +93,6 @@ def get_coin_data(coin="BTC-USDT"):
     shadow_lower = latest['shadow_lower']
     timestamp = latest['timestamp']
 
-    # 触发boll信号,下跌趋势
-    past_low_boll = df[df['is_low_boll']].iloc[-1:]
-    if not past_low_boll.empty:
-        last_close = past_low_boll['close'].values[0]
-        prev_close = df['close'].iloc[-2]
-        if (close < last_close) and (prev_close > last_close):
-            msg = f'⚠️报警: {title} 当前收盘价 {close} 小于上次BOLL下轨触发时的收盘价 {last_close}'
-            send_message(msg)
-
-    # 触发boll信号,上涨趋势
-    past_close_boll = df[df['is_high_boll']].iloc[-1:]
-    if not past_close_boll.empty:
-        last_close = past_close_boll['close'].values[0]
-        prev_close = df['close'].iloc[-2]
-        if (close > last_close) and (prev_close < last_close):
-            msg = f'⚠️报警: {title} 当前收盘价 {close} 大于上次BOLL上轨触发时的收盘价 {last_close}'
-            send_message(msg)
-
-    # # 如果这次最低价比上一次出现的最低价高，则报警
-    # past_min = df[df['is_min_price']].iloc[-2:-1]  # 上一次最低价信号
-    # if not past_min.empty:
-    #     last_min_low = past_min['low'].values[0]
-    #     current_low = latest['low']
-    #     if current_low > last_min_low:
-    #         msg = f'🚨提醒: {title} 当前最低价 {current_low} 高于上次最低价信号 {last_min_low}'
-    #         send_message(msg)
-
     # 如果距离上次上穿中线后，后面连续7次都在中线上方，则报警
     last_cross = df[df['yang_sma_x']].iloc[-1:]  # 找到最后一次阳柱上穿中线的K线
     if not last_cross.empty:
@@ -143,25 +116,37 @@ def get_coin_data(coin="BTC-USDT"):
                 msg = f'⚠️趋势转弱: {title} 从上次下穿中线后，连续7根K线都收盘在中线下方'
                 send_message(msg)
 
-    # 触发信号
-    if latest['is_yang_two']:
-        msg = f'🥃2连阳 {title} 📈涨幅:{return_0}% 👁当前价:{close}'
-        send_message(msg)
-
-    if latest['is_yin_two']:
-        msg = f'🍭2连阴 {title} 📉涨幅:{return_0}% 👁当前价:{close}'
-        send_message(msg)
-
-    if latest['yang_sma_x']:
+    if latest['yang_sma_x'] and return_0 >= 0.2:
         msg = f'🦷阳柱上穿中线 {title} 📊涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg)
 
-    if latest['yin_sma_x']:
+    if latest['yin_sma_x'] and return_0 <= -0.2:
         msg = f'🦷阴柱下穿中线 {title} 📊涨幅:{return_0}% 👁当前价:{close}'
         send_message(msg)
 
-    if latest['shadow_lower'] >= 0.51:
-        msg = f'🔥下影线太长: {title} 📊涨幅:{return_0}% 👁下影线:{shadow_lower}'
+    if latest['shadow_lower'] >= 0.66:
+        msg = f'🔥探底回升: {title} 📊涨幅:{return_0}% 👁下影线:{shadow_lower}'
+        send_message(msg)
+
+    # =============================
+    # 连续两根阴线跌破BOLL下轨报警
+    # =============================
+    last2 = df.iloc[-2:]  # 取最后2根K线
+    if (
+            (last2['close'] < last2['open']).all() and  # 连续阴线
+            (last2['close'] < last2['lower']).all()  # 全部收盘在下轨下方
+    ):
+        msg = f'⚠️连续2阴 下破BOLL下轨: {title} 📊最新价:{close}'
+        send_message(msg)
+
+    # =============================
+    # 连续两根阳线上破BOLL上轨报警
+    # =============================
+    if (
+            (last2['close'] > last2['open']).all() and  # 连续阳线
+            (last2['close'] > last2['upper']).all()  # 全部收盘在上轨上方
+    ):
+        msg = f'🚀连续2阳 上破BOLL上轨: {title} 📊最新价:{close}'
         send_message(msg)
 
     print("*********************--------------*********************")

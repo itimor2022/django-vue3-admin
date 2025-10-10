@@ -1,5 +1,4 @@
 import requests
-import time
 import pandas as pd
 
 # 设置显示参数
@@ -112,14 +111,14 @@ def get_coin_data(coin="BTC-USDT"):
             msg = f'⚠️报警: {title} 当前收盘价 {close} 大于上次BOLL上轨触发时的收盘价 {last_close}'
             send_message(msg)
 
-    # 如果这次最低价比上一次出现的最低价高，则报警
-    past_min = df[df['is_min_price']].iloc[-2:-1]  # 上一次最低价信号
-    if not past_min.empty:
-        last_min_low = past_min['low'].values[0]
-        current_low = latest['low']
-        if current_low > last_min_low:
-            msg = f'🚨提醒: {title} 当前最低价 {current_low} 高于上次最低价信号 {last_min_low}'
-            send_message(msg)
+    # # 如果这次最低价比上一次出现的最低价高，则报警
+    # past_min = df[df['is_min_price']].iloc[-2:-1]  # 上一次最低价信号
+    # if not past_min.empty:
+    #     last_min_low = past_min['low'].values[0]
+    #     current_low = latest['low']
+    #     if current_low > last_min_low:
+    #         msg = f'🚨提醒: {title} 当前最低价 {current_low} 高于上次最低价信号 {last_min_low}'
+    #         send_message(msg)
 
     # 如果距离上次上穿中线后，后面连续7次都在中线上方，则报警
     last_cross = df[df['yang_sma_x']].iloc[-1:]  # 找到最后一次阳柱上穿中线的K线
