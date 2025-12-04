@@ -1,5 +1,6 @@
 import requests
 import pandas as pd
+import numpy as np
 from datetime import datetime
 
 # ==================== 配置区 ====================
@@ -36,6 +37,26 @@ def get_candles(instId="BTC-USDT", bar="15m", limit=200):
         return pd.DataFrame()
 
 
+def add_adx(df, period=14):
+    df["tr"] = np.maximum(df["high"] - df["low"],
+                          np.maximum(abs(df["high"] - df["close"].shift(1)),
+                                     abs(df["low"] - df["close"].shift(1))))
+    df["+dm"] = np.where(df["high"] - df["high"].shift(1) > df["low"].shift(1) - df["low"],
+                         np.maximum(df["high"] - df["high"].shift(1), 0), 0)
+    df["-dm"] = np.where(df["low"].shift(1) - df["low"] > df["high"] - df["high"].shift(1),
+                         np.maximum(df["low"].shift(1) - df["low"], 0), 0)
+
+    df["+di"] = 100 * (df["+dm"].rolling(period).sum() /
+                       df["tr"].rolling(period).sum().replace(0, np.nan))
+    df["-di"] = 100 * (df["-dm"].rolling(period).sum() /
+                       df["tr"].rolling(period).sum().replace(0, np.nan))
+
+    df["dx"] = 100 * abs(df["+di"] - df["-di"]) / \
+               (df["+di"] + df["-di"]).replace(0, np.nan)
+    df["adx"] = df["dx"].rolling(period).mean()
+    return df
+
+
 def add_indicators(df, period=20, fast=8, slow=21):
     df["ema_fast"] = df["close"].ewm(span=fast, adjust=False).mean()
     df["ema_slow"] = df["close"].ewm(span=slow, adjust=False).mean()
@@ -53,6 +74,7 @@ def add_indicators(df, period=20, fast=8, slow=21):
     df["vol_ma"] = df["vol"].rolling(20).mean()
     df["big_vol"] = df["vol"] > df["vol_ma"] * 1.9  # 放量阈值略降低，避免错过
 
+    df = add_adx(df)
     return df
 
 
