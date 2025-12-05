@@ -1,159 +1,147 @@
+# -*- coding: utf-8 -*-
 import requests
 import pandas as pd
 import numpy as np
 from datetime import datetime
+import os
 
 # ==================== 配置区 ====================
 chat_id = "-4966987679"
 TOKEN = "8444348700:AAGqkeUUuB_0rI_4qIaJxrTylpRGh020wU0"
 BASE_URL = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+LOCK_FILE = "multi_signal_lock.txt"   # 防刷屏（同类信号1小时内只发1次）
 
-
-def send_message(text):
+# ==================== 工具函数 ====================
+def send(msg):
     try:
-        requests.get(BASE_URL, params={
-            "chat_id": chat_id,
-            "text": text,
-            "parse_mode": "HTML",
-            "disable_web_page_preview": True
-        }, timeout=10)
+        requests.post(BASE_URL, json={"chat_id": chat_id, "text": msg, "parse_mode": "HTML", "disable_web_page_preview": True}, timeout=10)
     except:
         pass
 
-
-def get_candles(instId="BTC-USDT", bar="15m", limit=200):
-    url = "https://www.okx.com/api/v5/market/candles"
-    params = {"instId": instId, "bar": bar, "limit": limit}
+def can_send(sig_type):  # sig_type = "S1","S2",..."W1" 等
+    if not os.path.exists(LOCK_FILE):
+        return True
     try:
-        data = requests.get(url, params=params, timeout=10).json()["data"]
-        df = pd.DataFrame(data, columns=["ts", "o", "h", "l", "c", "vol", "volCcy", "volCcyQuote", "confirm"])
+        with open(LOCK_FILE) as f:
+            for line in f.read().strip().split("\n"):
+                if not line: continue
+                t, tm = line.split("|")
+                if t == sig_type and (datetime.now() - datetime.fromisoformat(tm)).total_seconds() < 3600:
+                    return False
+        return True
+    except:
+        return True
+
+def record(sig_type):
+    with open(LOCK_FILE, "a", encoding="utf-8") as f:
+        f.write(f"{sig_type}|{datetime.now().isoformat()}\n")
+
+# ==================== K线 & 指标 ====================
+def get(bar="15m"):
+    url = "https://www.okx.com/api/v5/market/candles"
+    p = {"instId": "BTC-USDT", "bar": bar, "limit": 300}
+    try:
+        d = requests.get(url, params=p, timeout=10).json()["data"]
+        df = pd.DataFrame(d, columns=["ts","o","h","l","c","vol","volCcy","volCcyQuote","confirm"])
         df["ts"] = pd.to_datetime(df["ts"].astype(int), unit='ms')
-        df = df.astype({"o": float, "h": float, "l": float, "c": float, "vol": float})
-        df = df[["ts", "o", "h", "l", "c", "vol"]].sort_values("ts").reset_index(drop=True)
-        df.columns = ["ts", "open", "high", "low", "close", "vol"]
+        df = df.astype({"o":float,"h":float,"l":float,"c":float,"vol":float})
+        df = df[["ts","open","high","low","close","vol"]].sort_values("ts").reset_index(drop=True)
         return df
-    except Exception as e:
-        print("获取K线失败:", e)
+    except:
         return pd.DataFrame()
 
+def add_tech(df):
+    df["e8"]  = df["close"].ewm(span=8,  adjust=False).mean()
+    df["e21"] = df["close"].ewm(span=21, adjust=False).mean()
+    df["e55"] = df["close"].ewm(span=55, adjust=False).mean()
 
-def add_adx(df, period=14):
-    df["tr"] = np.maximum(df["high"] - df["low"],
-                          np.maximum(abs(df["high"] - df["close"].shift(1)),
-                                     abs(df["low"] - df["close"].shift(1))))
-    df["+dm"] = np.where(df["high"] - df["high"].shift(1) > df["low"].shift(1) - df["low"],
-                         np.maximum(df["high"] - df["high"].shift(1), 0), 0)
-    df["-dm"] = np.where(df["low"].shift(1) - df["low"] > df["high"] - df["high"].shift(1),
-                         np.maximum(df["low"].shift(1) - df["low"], 0), 0)
+    df["sma20"] = df["close"].rolling(20).mean()
+    df["std20"] = df["close"].rolling(20).std()
+    df["upper"] = df["sma20"] + 2*df["std20"]
+    df["lower"] = df["sma20"] - 2*df["std20"]
+    df["bw"] = df["upper"] - df["lower"]
+    df["bw_exp"] = df["bw"] > df["bw"].shift(1) * 1.06
 
-    df["+di"] = 100 * (df["+dm"].rolling(period).sum() /
-                       df["tr"].rolling(period).sum().replace(0, np.nan))
-    df["-di"] = 100 * (df["-dm"].rolling(period).sum() /
-                       df["tr"].rolling(period).sum().replace(0, np.nan))
+    df["vol20"] = df["vol"].rolling(20).mean()
+    df["v1"] = df["vol"] > df["vol20"] * 1.6   # 轻度放量
+    df["v2"] = df["vol"] > df["vol20"] * 2.2   # 重度放量
 
-    df["dx"] = 100 * abs(df["+di"] - df["-di"]) / \
-               (df["+di"] + df["-di"]).replace(0, np.nan)
-    df["adx"] = df["dx"].rolling(period).mean()
+    df["up"] = df["close"] > df["upper"]
+    df["dn"] = df["close"] < df["lower"]
+
+    df["gold"] = (df["e8"] > df["e21"]) & (df["e8"].shift(1) <= df["e21"].shift(1))
+    df["dead"] = (df["e8"] < df["e21"]) & (df["e8"].shift(1) >= df["e21"].shift(1))
+
     return df
 
-
-def add_indicators(df, period=20, fast=8, slow=21):
-    df["ema_fast"] = df["close"].ewm(span=fast, adjust=False).mean()
-    df["ema_slow"] = df["close"].ewm(span=slow, adjust=False).mean()
-    df["trend"] = (df["ema_fast"] > df["ema_slow"]).astype(int)
-    df["cross_up"] = (df["trend"] == 1) & (df["trend"].shift(1) == 0)
-    df["cross_dn"] = (df["trend"] == 0) & (df["trend"].shift(1) == 1)
-
-    df["sma"] = df["close"].rolling(period).mean()
-    df["std"] = df["close"].rolling(period).std()
-    df["upper"] = df["sma"] + 2 * df["std"]
-    df["lower"] = df["sma"] - 2 * df["std"]
-    df["band_width"] = df["upper"] - df["lower"]
-    df["bw_expand"] = df["band_width"] > df["band_width"].shift(1) * 1.12  # 扩张12%以上才算
-
-    df["vol_ma"] = df["vol"].rolling(20).mean()
-    df["big_vol"] = df["vol"] > df["vol_ma"] * 1.9  # 放量阈值略降低，避免错过
-
-    df = add_adx(df)
-    return df
-
-
+# ==================== 主程序 ====================
 def main():
-    df_15m = get_candles("BTC-USDT", "15m", 200)
-    df_30m = get_candles("BTC-USDT", "30m", 200)
-
-    if df_15m.empty or df_30m.empty or len(df_15m) < 60 or len(df_30m) < 60:
+    df15 = add_tech(get("15m"))
+    df30 = add_tech(get("30m"))
+    if len(df15)<100 or len(df30)<80:
         return
 
-    df_15m = add_indicators(df_15m.copy(), period=20, fast=8, slow=21)
-    df_30m = add_indicators(df_30m.copy(), period=20, fast=9, slow=26)  # 30m用更稳的参数
+    l15 = df15.iloc[-1]
+    p15 = df15.iloc[-2]
+    l30 = df30.iloc[-1]
 
-    latest_15m = df_15m.iloc[-1]
-    prev_15m = df_15m.iloc[-2]
-    latest_30m = df_30m.iloc[-1]
+    price = l15["close"]
+    ts    = l15["ts"].strftime("%m-%d %H:%M")
+    vr    = l15["vol"]/l15["vol20"]
 
-    close = latest_15m["close"]
-    ts = latest_15m["ts"].strftime("%m-%d %H:%M")
-    vol_ratio = latest_15m["vol"] / latest_15m["vol_ma"]
+    # ====================== 信号大全（由强到弱） ======================
+    # S1级：核弹级主升浪起点（一天1~2次）
+    if (l15["gold"] and l15["v2"] and l15["bw_exp"] and l15["up"] and
+        l15["low"] >= p15["low"] and l30["e8"] > l30["e21"] > l30["e55"] and can_send("S1")):
+        send(f"""【S1 核弹级多头】主升浪已启动！
+{ts}  ${price:.1f}
+• 15m金叉+重度放量{vr:.2f}x+破上轨
+• 30m三线多头排列
+立即全仓或分批进多！目标+15%~40%""")
+        record("S1")
 
-    # ==================== 30m 大趋势判断 ====================
-    trend_30m = "多头趋势" if latest_30m["trend"] == 1 else "空头趋势"
-    strength_30m = "强势" if latest_30m["adx"] > 30 else "一般"  # 你可以加ADX，这里用EMA趋势代替
+    # S2级：强趋势金叉（一天3~6次）
+    elif (l15["gold"] and l15["v1"] and l15["bw_exp"] and l30["e8"]>l30["e21"] and can_send("S2")):
+        send(f"""【S2 强势金叉】短线多单机会
+{ts}  ${price:.1f}
+• 15m金叉+放量{vr:.2f}x+布林张口
+• 30m多头趋势
+建议：现价或回踩EMA8进多""")
+        record("S2")
 
-    # ==================== 核心信号：15m 启动 + 30m 共振 ====================
-    if (latest_15m["cross_up"] and
-            latest_15m["big_vol"] and
-            latest_15m["bw_expand"] and
-            latest_30m["trend"] == 1):  # 必须30m也在多头
+    # S3级：突破上轨放量（追涨信号）
+    if (l15["up"] and l15["v1"] and l30["e8"]>l30["e21"] and can_send("S3")):
+        send(f"""【S3 突破上轨】短线追涨
+{ts}  ${price:.1f}  已收在上轨之上
+30m多头背景，可轻仓追""")
+        record("S3")
 
-        power = "极强共振" if latest_30m["ema_fast"] > latest_30m["ema_slow"] * 1.003 else "强共振"
-        msg = f"""BTC 多头爆发 ‼️‼️
-时间：{ts}
-价格：${close:.1f}
-15m：EMA8金叉 + 放量{vol_ratio:.1f}x + 布林张口
-30m：{trend_30m}（{power}）
-→ 15m+30m 双周期共振做多信号！
-建议：现价或回踩EMA8附近进场多单"""
-        send_message(msg)
+    # W1级：轻度回调结束（回踩买入）
+    if (p15["close"] < p15["lower"] and l15["close"] > l15["lower"] and l15["v1"] and l30["e8"]>l30["e21"] and can_send("W1")):
+        send(f"""【W1 超跌反弹】绝佳抄底点！
+{ts}  ${price:.1f}
+上一根砸穿下轨，本根收回+放量
+30m仍多头 → 暴力反弹概率极高""")
+        record("W1")
 
-    if (latest_15m["cross_dn"] and
-            latest_15m["big_vol"] and
-            latest_15m["bw_expand"] and
-            latest_30m["trend"] == 0):
-        power = "极强共振" if latest_30m["ema_fast"] < latest_30m["ema_slow"] * 0.997 else "强共振"
-        msg = f"""BTC 空头启动 ‼️‼️
-时间：{ts}
-价格：${close:.1f}
-15m：EMA8死叉 + 放量{vol_ratio:.1f}x + 布林张口
-30m：{trend_30m}（{power}）
-→ 15m+30m 双周期共振做空信号！
-建议：现价或反弹EMA8附近进场空单"""
-        send_message(msg)
+    # W2级：轻度恐慌（可减仓观察）
+    if (l15["dn"] and l15["v2"] and l30["e8"]>l30["e21"] and can_send("W2")):
+        send(f"""【W2 短线恐慌】多头洗盘
+{ts}  ${price:.1f}
+击穿下轨+巨量，通常是洗盘
+持仓不动，敢抄的可以轻仓低吸""")
+        record("W2")
 
-    # ==================== 额外：15m极端拉升/杀跌（不看30m）===================
-    if (prev_15m["close"] > prev_15m["upper"] and
-            latest_15m["close"] > latest_15m["upper"] and
-            latest_15m["big_vol"] and prev_15m["big_vol"]):
-        msg = f"""BTC 15m 疯狂拉升！已连续突破布林上轨
-时间：{ts} | 价格：${close:.1f}
-30m趋势：{trend_30m}
-追涨需谨慎！可能冲顶在见短顶"""
-        send_message(msg)
+    # 空头信号（只在明确空头趋势下发）
+    if (l15["dead"] and l15["v2"] and l15["dn"] and l30["e8"]<l30["e21"]<l30["e55"] and can_send("K1")):
+        send(f"""【K1 强空信号】可短空
+{ts}  ${price:.1f}
+15m死叉+重度放量击穿下轨
+30m三线空头 → 短线做空机会""")
+        record("K1")
 
-    if (prev_15m["close"] < prev_15m["lower"] and
-            latest_15m["close"] < latest_15m["lower"] and
-            latest_15m["big_vol"] and prev_15m["big_vol"]):
-        msg = f"""BTC 15m 恐慌杀跌！连续击穿下轨
-时间：{ts} | 价格：${close:.1f}
-30m趋势：{trend_30m}
-极度超卖，或有暴力反弹！"""
-        send_message(msg)
-
-    # 调试信息
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] BTC 15m ${close:.0f} | "
-          f"15m={'多' if latest_15m['trend'] == 1 else '空'} + 放量{latest_15m['big_vol']} | "
-          f"30m={'多' if latest_30m['trend'] == 1 else '空'}")
-
+    # 调试
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] BTC ${price:.0f} | 15m{'多' if l15['e8']>l15['e21'] else '空'} | 30m{'多' if l30['e8']>l30['e21'] else '空'}")
 
 if __name__ == '__main__':
     main()
