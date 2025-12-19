@@ -6,7 +6,7 @@ from datetime import datetime
 import os
 
 # ==================== 配置区 ====================
-chat_id = "-4966987679"
+chat_id = "-5068436114"
 TOKEN = "8444348700:AAGqkeUUuB_0rI_4qIaJxrTylpRGh020wU0"
 BASE_URL = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
 LOCK_FILE = "1555_multi_signal_lock.txt"   # 防刷屏（同类信号1小时内只发1次）
