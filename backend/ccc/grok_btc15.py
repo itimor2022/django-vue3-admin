@@ -1,19 +1,16 @@
 import requests
 import pandas as pd
 from datetime import datetime
-import os
 
 # ==================== 配置区 ====================
 chat_id = "-4850300375"
 TOKEN = "8444348700:AAGqkeUUuB_0rI_4qIaJxrTylpRGh020wU0"
 BASE_URL = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
 
-SIGNAL_FILE = "15m_signal_lock.txt"   # 防刷屏文件
 
-# ==================== 工具函数 ====================
 def send_message(text):
     try:
-        requests.post(BASE_URL, json={                 # 改用POST更稳定
+        requests.get(BASE_URL, params={
             "chat_id": chat_id,
             "text": text,
             "parse_mode": "HTML",
@@ -22,144 +19,111 @@ def send_message(text):
     except:
         pass
 
-def can_send(direction):  # direction: "long" 或 "short"
-    if not os.path.exists(SIGNAL_FILE):
-        return True
-    try:
-        with open(SIGNAL_FILE, "r", encoding="utf-8") as f:
-            last_dir, last_time = f.read().strip().split("|")
-            last_dt = datetime.fromisoformat(last_time)
-            if (datetime.now() - last_dt).total_seconds() < 1800:  # 30分钟锁
-                return direction != last_dir
-            return True
-    except:
-        return True
 
-def record_signal(direction):
-    with open(SIGNAL_FILE, "w", encoding="utf-8") as f:
-        f.write(f"{direction}|{datetime.now().isoformat()}")
-
-# ==================== 主逻辑 ====================
-def get_candles():
+def get_candles(instId="BTC-USDT", bar="15m", limit=200):
     url = "https://www.okx.com/api/v5/market/candles"
-    params = {"instId": "BTC-USDT", "bar": "15m", "limit": 200}
+    params = {"instId": instId, "bar": bar, "limit": limit}
     try:
         data = requests.get(url, params=params, timeout=10).json()["data"]
         df = pd.DataFrame(data, columns=["ts", "o", "h", "l", "c", "vol", "volCcy", "volCcyQuote", "confirm"])
         df["ts"] = pd.to_datetime(df["ts"].astype(int), unit='ms')
-        df = df.astype({"o":float, "h":float, "l":float, "c":float, "vol":float})
+        df = df.astype({"o": float, "h": float, "l": float, "c": float, "vol": float})
         df = df[["ts", "o", "h", "l", "c", "vol"]].sort_values("ts").reset_index(drop=True)
         df.columns = ["ts", "open", "high", "low", "close", "vol"]
         return df
     except:
         return pd.DataFrame()
 
-def analyze():
-    df = get_candles()
-    if df.empty or len(df) < 80:
-        print(f"[{datetime.now().strftime('%H:%M:%S')}] 数据不足")
+
+def analyze_15m(df):
+    if len(df) < 60:
         return
 
-    # ============ 指标计算 ============
-    df["ema8"]  = df["close"].ewm(span=8,  adjust=False).mean()
+    # ============ 核心三指标（只保留最强信号） ============
+
+    # 1. EMA8 vs EMA21（比12/21更灵敏，专为15m设计）
+    df["ema8"] = df["close"].ewm(span=8, adjust=False).mean()
     df["ema21"] = df["close"].ewm(span=21, adjust=False).mean()
+    df["trend"] = (df["ema8"] > df["ema21"]).astype(int)  # 1=多 0=空
+    df["cross_up"] = (df["trend"] == 1) & (df["trend"].shift(1) == 0)
+    df["cross_dn"] = (df["trend"] == 0) & (df["trend"].shift(1) == 1)
+
+    # 2. 布林带中轨 + 带宽扩张（趋势启动标志）
     df["sma20"] = df["close"].rolling(20).mean()
     df["std20"] = df["close"].rolling(20).std()
     df["upper"] = df["sma20"] + 2 * df["std20"]
     df["lower"] = df["sma20"] - 2 * df["std20"]
-    df["bw"]    = df["upper"] - df["lower"]
-    df["bw_expand"] = df["bw"] > df["bw"].shift(1) * 1.08   # 8%扩张
+    df["band_width"] = df["upper"] - df["lower"]
+    df["bw_expand"] = df["band_width"] > df["band_width"].shift(1) * 1.1  # 带宽扩张10%以上
 
-    df["vol_ma20"] = df["vol"].rolling(20).mean()
-    df["vol_spike"] = df["vol"] > df["vol_ma20"] * 1.82    # 关键：1.82倍
-
-    df["bull"] = df["ema8"] > df["ema21"]
-    df["cross_up"]   = df["bull"] & (~df["bull"].shift(1).fillna(False))
-    df["cross_dn"]   = (~df["bull"]) & (df["bull"].shift(1).fillna(False))
-
-    df["break_upper"] = df["close"] > df["upper"]
-    df["break_lower"] = df["close"] < df["lower"]
+    # 3. 放量：当前成交量 > 近20根均量的2倍
+    df["vol_ma"] = df["vol"].rolling(20).mean()
+    df["big_vol"] = df["vol"] > df["vol_ma"] * 2
 
     latest = df.iloc[-1]
-    prev   = df.iloc[-2]
-    price  = latest["close"]
-    ts     = latest["ts"].strftime("%m-%d %H:%M")
-    vol_ratio = latest["vol"] / latest["vol_ma20"]
+    prev = df.iloc[-2]
+    close = latest["close"]
+    ts = latest["ts"].strftime("%m-%d %H:%M")
 
-    # ============ 终极多头信号（极少但极准） ============
-    if (latest["cross_up"] and
-        latest["vol_spike"] and
-        latest["bw_expand"] and
-        latest["break_upper"] and
-        latest["low"] >= prev["low"] and   # 金叉后不创新低
-        price > latest["sma20"] and        # 在中轨之上
-        can_send("long")):
+    # ==================== 极简发信号逻辑 ====================
 
-        strength = "核弹级" if vol_ratio >= 3.5 else "超强"
-        msg = f"""BTC 15m 核弹多头发射
+    alert_sent = False
 
+    # 信号1：金叉 + 放量 + 布林带扩张（多头爆发
+    if latest["cross_up"] and latest["big_vol"] and latest["bw_expand"]:
+        msg = f"""🚀 BTC 15m 多头爆发信号 ‼️
 时间：{ts}
-价格：${price:.1f}
-
-【核心确认】
-• EMA8 金叉 EMA21
-• 放量 {vol_ratio:.2f}倍（{strength}）
-• 布林带张口 + 收盘强破上轨
-• 金叉后未创新低（真突破！）
-
-趋势已启动，大概率开启主升浪
-建议：立即追多 或 回踩 EMA8 加仓
-目标：+8% ~ +25%+"""
-
+价格：${close:.1f}
+EMA8上穿EMA21金叉
+放量 {latest['vol'] / latest['vol_ma']:.1f}倍
+布林带张口扩张
+→ 趋势启动，建议顺势做多"""
         send_message(msg)
-        record_signal("long")
-        print(f"多头核弹信号已发出")
+        alert_sent = True
 
-    # ============ 终极空头信号（谨慎追空） ============
-    if (latest["cross_dn"] and
-        latest["vol_spike"] and
-        latest["bw_expand"] and
-        latest["break_lower"] and
-        price < latest["sma20"] and        # 跌破中轨
-        can_send("short")):
-
-        msg = f"""BTC 15m 空头趋势启动
-
+    # 信号2：死叉 + 放量 + 布林带扩张空头启动
+    if latest["cross_dn"] and latest["big_vol"] and latest["bw_expand"]:
+        msg = f"""💥 BTC 15m 空头启动信号 ‼️
 时间：{ts}
-价格：${price:.1f}
-
-【核心确认】
-• EMA8 死叉 EMA21
-• 放量 {vol_ratio:.2f}倍
-• 收盘击穿布林下轨 + 带宽扩张
-
-下跌趋势确立，可短线顺势做空
-建议：现价轻仓空 / 反弹 EMA8 再入
-目标：-7% ~ -15%"""
-
+价格：${close:.1f}
+EMA8下穿EMA21死叉
+放量 {latest['vol'] / latest['vol_ma']:.1f}倍
+布林带张口扩张
+→ 下跌趋势确立，建议顺势做空"""
         send_message(msg)
-        record_signal("short")
+        alert_sent = True
 
-    # ============ 疯狂追涨/恐慌提示（可选） ============
-    if (prev["break_upper"] and latest["break_upper"] and latest["vol_spike"]):
-        msg = f"""BTC 15m 极度亢奋！
-
-{ts} | ${price:.1f}
-连续两根收在上轨之上 + 放量
-冲顶风险极高！谨慎追涨"""
+    # 信号3：连续2根大阳线突破上轨 + 持续放量强势上涨中
+    if (prev["close"] > prev["upper"] and
+            latest["close"] > latest["upper"] and
+            latest["close"] > prev["close"] and
+            latest["big_vol"] and prev["big_vol"]):
+        msg = f"""🔥 BTC 15m 疯狂拉升中！
+时间：{ts}
+价格：${close:.1f}（+{latest['close'] / prev['close'] - 1:.2%}）
+连续突破布林上轨
+持续巨量，追涨要小心冲顶！"""
         send_message(msg)
 
-    if (prev["break_lower"] and latest["break_lower"] and latest["vol_spike"]):
-        msg = f"""BTC 15m 极端恐慌！
-
-{ts} | ${price:.1f}
-连续击穿下轨，极度超卖
-注意：可能V型反转，空单减仓！"""
+    # 信号4：连续2根大阴线击穿下轨恐慌杀跌
+    if (prev["close"] < prev["lower"] and
+            latest["close"] < latest["lower"] and
+            latest["close"] < prev["close"] and
+            latest["big_vol"] and prev["big_vol"]):
+        msg = f"""⚠️ BTC 15m 恐慌杀跌！
+时间：{ts}
+价格：${close:.1f}（-{1 - latest['close'] / prev['close']:.2%}）
+连续击穿布林下轨
+放量下杀，或有极端超跌反弹机会"""
         send_message(msg)
 
-    # ============ 调试信息 ============
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] BTC 15m ${price:.0f} | "
-          f"趋势={'多' if latest['bull'] else '空'} | 放量{vol_ratio:.2f}x | 带宽扩:{latest['bw_expand']}")
+    # 调试打印（可注释）
+    status = "多头" if latest["trend"] else "空头"
+    print(
+        f"{datetime.now().strftime('%H:%M')} | BTC 15m | ${close:.0f} | {status} | 放量:{latest['big_vol']} 带宽扩:{latest['bw_expand']}")
+
 
 if __name__ == '__main__':
-    analyze()
+    df = get_candles("BTC-USDT", "15m", 200)
+    if not df.empty:
+        analyze_15m(df)
