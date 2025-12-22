@@ -66,7 +66,7 @@ def get(bar="15m"):
             d,
             columns=["ts","open","high","low","close","vol","volCcy","volCcyQuote","confirm"]
         )
-        df["ts"] = pd.to_datetime(df["ts"].astype(int), unit="ms")
+        df["ts"] = pd.to_datetime(df["ts"].astype(int), unit='ms') + pd.Timedelta(hours=7)  # 亚洲时间
         df = df.astype({
             "open": float, "high": float, "low": float, "close": float, "vol": float
         })
