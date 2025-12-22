@@ -134,16 +134,16 @@ def trend_alert(df_15m):
         signals.append(f"⚠️跌破布林下轨 → 空头强势加速")
 
     # 2. EMA金叉死叉 + ADX（方案2：门槛降到15，强度分三级）
-    if latest.get("ema_cross_up", False) and latest["adx"] > 15:
+    if latest.get("ema_cross_up", False) and latest["adx"] > 16:
         if latest["adx"] > 30:
             strength = "强"
-        elif latest["adx"] > Ï20:
+        elif latest["adx"] > 20:
             strength = "中"
         else:
             strength = "弱"
         signals.append(f"🚀EMA12上穿21 + ADX={latest['adx']:.1f} ({strength}) → 多头趋势启动")
 
-    if latest.get("ema_cross_dn", False) and latest["adx"] > 15:
+    if latest.get("ema_cross_dn", False) and latest["adx"] > 16:
         if latest["adx"] > 30:
             strength = "强"
         elif latest["adx"] > 20:
