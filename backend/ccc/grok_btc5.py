@@ -111,10 +111,13 @@ def trend_alert(df_15m):
             signals.append(f"🚀第一阳线上穿下轨 + 第二阳线 + 第一阳实体 > 阴线实体 → 多头反转信号")
 
     # 信号2: 2根连续阳线直接从下轨碰到中轨（第一根开盘接近下轨，最后一根收盘接近中轨，接近2%）
-    near_lower = abs(prev["open"] - prev["lower"]) / prev["lower"] < 0.02
-    near_mid = abs(latest["close"] - latest["mid"]) / latest["mid"] < 0.02
+    near_lower = prev["low"] < prev["lower"]
+    near_latest_lower = latest["low"] < latest["lower"]
+    near_mid = latest["close"] > latest["mid"]
     if prev["is_bull"] and latest["is_bull"] and near_lower and near_mid:
         signals.append(f"🚀2根连续阳线从下轨直达中轨 → 多头强势拉升")
+    if prev["is_bull"] and latest["is_bull"] and near_latest_lower and near_mid:
+        signals.append(f"🚀1根连续阳线从下轨直达中轨 → 多头强势拉升")
 
     # 辅助信号: 连续破轨（只多头：连续2根破布林上轨）
     if (prev["close"] > prev["upper"]) and (latest["close"] > latest["upper"]) and close > latest["mid"]:
