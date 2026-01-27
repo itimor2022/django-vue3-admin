@@ -15,7 +15,6 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
-
 # ==================== 配置区 ====================
 CHAT_ID = "-4836241115"
 TOKEN = "8444348700:AAGqkeUUuB_0rI_4qIaJxrTylpRGh020wU0"
@@ -44,7 +43,8 @@ def get_candles(instId="BTC-USDT", bar="15m", limit=300):
     try:
         r = requests.get(url, params=params, timeout=10)
         data = r.json()["data"]
-        df = pd.DataFrame(data, columns=["ts", "open", "high", "low", "close", "vol", "volCcy", "volCcyQuote", "confirm"])
+        df = pd.DataFrame(data,
+                          columns=["ts", "open", "high", "low", "close", "vol", "volCcy", "volCcyQuote", "confirm"])
         df["ts"] = pd.to_datetime(df["ts"].astype(int), unit='ms') + pd.Timedelta(hours=7)  # 亚洲时间
         df = df.astype({"open": float, "high": float, "low": float, "close": float, "vol": float})
         df = df[["ts", "open", "high", "low", "close", "vol"]].sort_values("ts").reset_index(drop=True)
@@ -73,36 +73,9 @@ def add_technical_indicators(df):
     df["lower"] = df["sma25"] - 2 * df["std25"]
     df["mid"] = df["sma25"]
 
-    # ADX
-    def calc_adx(high, low, close, period=14):
-        df_temp = pd.DataFrame({"high": high, "low": low, "close": close})
-        plus_dm = high.diff()
-        minus_dm = low.diff()
-        plus_dm[plus_dm < 0] = 0
-        minus_dm[minus_dm > 0] = 0
-        minus_dm = abs(minus_dm)
-
-        tr1 = pd.DataFrame(high - low)
-        tr2 = pd.DataFrame(abs(high - close.shift(1)))
-        tr3 = pd.DataFrame(abs(low - close.shift(1)))
-        tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
-        atr = tr.rolling(period).mean()
-
-        plus_di = 100 * (plus_dm.ewm(alpha=1/period).mean() / atr)
-        minus_di = 100 * (minus_dm.ewm(alpha=1/period).mean() / atr)
-        dx = (abs(plus_di - minus_di) / (plus_di + minus_di)) * 100
-        adx = dx.ewm(alpha=1/period).mean()
-        return adx
-
-    df["adx"] = calc_adx(df["high"], df["low"], df["close"])
-
-    # 锤头线
-    df["lower_shadow"] = (df[["open", "close"]].min(axis=1) - df["low"]) / (df["high"] - df["low"] + 1e-8)
-    df["is_hammer"] = (df["lower_shadow"] > 0.65) & (df["close"] > df["open"])
-
     # 放量
     df["vol_ma20"] = df["vol"].rolling(20).mean()
-    df["vol_spike"] = df["vol"] > df["vol_ma20"] * 1.5
+    df["vol_spike"] = df["vol"] > df["vol_ma20"] * 1.2
 
     # 阳线/阴线
     df["is_bull"] = df["close"] > df["open"]
@@ -116,7 +89,7 @@ def trend_alert(df_15m):
         return
 
     latest = df_15m.iloc[-1]  # 当前（第二阳线）
-    prev = df_15m.iloc[-2]    # 第一阳线
+    prev = df_15m.iloc[-2]  # 第一阳线
 
     close = latest["close"]
     ts = latest["ts"].strftime("%m-%d %H:%M")
@@ -139,20 +112,6 @@ def trend_alert(df_15m):
         if cond_prev or cond_latest:
             signals.append(f"🚀2根阳线实体突破上轨 + 其中一根上半部分是下半部分的2倍 → 主升浪多信号")
 
-    # 辅助信号: EMA金叉 + ADX（门槛15，强度分三级）
-    if latest["ema_cross_up"] and latest["adx"] > 15:
-        if latest["adx"] > 30:
-            strength = "强"
-        elif latest["adx"] > 20:
-            strength = "中"
-        else:
-            strength = "弱"
-        signals.append(f"🚀EMA12上穿21 + ADX={latest['adx']:.1f} ({strength}) → 多头趋势启动")
-
-    # 辅助信号: 锤头线探底回升
-    if latest["is_hammer"] and latest["close"] > latest["mid"] and latest["vol_spike"]:
-        signals.append(f"🔥锤头线探底回升（下影{latest['lower_shadow']:.1%}）+ 放量 → 底部反击")
-
     # 辅助信号: 连续破轨（只多头：连续2根破布林上轨）
     if (prev["close"] > prev["upper"]) and (latest["close"] > latest["upper"]) and close > latest["mid"]:
         signals.append(f"🚀连续2根破布林上轨 + 多头方向 → 疯狂追涨")
@@ -160,10 +119,6 @@ def trend_alert(df_15m):
     # 辅助信号: 放量确认（只多头）
     if latest["vol_spike"] and close > latest["mid"]:
         signals.append(f"📈放量上涨 + 布林多头方向 → 趋势增强")
-
-    # 辅助信号: 价格靠近上轨（预警，只多头）
-    if close > latest["upper"] * 0.98 and close <= latest["upper"]:
-        signals.append(f"🔼接近布林上轨 → 多头强势预警")
 
     # 构建并发送消息（只要有信号就发，无去重）
     if signals:
@@ -175,15 +130,13 @@ def trend_alert(df_15m):
         for sig in signals:
             msg += f"{sig}\n"
 
-        msg += f"\n📊 ADX: {latest['adx']:.1f} | EMA趋势: {'多头' if latest['trend_ema']==1 else '空头'}"
-
         send_message(msg)
         print(f"【{datetime.now().strftime('%H:%M')}】发送布林主升浪多趋势报告 - {len(signals)}个信号")
     else:
         print(f"【{datetime.now().strftime('%H:%M')}】无主升浪多信号")
 
     # 控制台打印当前状态
-    print(f"{datetime.now().strftime('%m-%d %H:%M')} | BTC ${close:.0f} | 布林方向: {boll_direction} | ADX: {latest['adx']:.1f}")
+    print(f"{datetime.now().strftime('%m-%d %H:%M')} | BTC ${close:.0f} | 布林方向: {boll_direction}")
 
 
 def main():
