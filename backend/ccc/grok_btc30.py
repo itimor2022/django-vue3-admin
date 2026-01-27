@@ -130,12 +130,12 @@ def trend_alert(df_15m):
     # 收集所有触发信号（只多头）
     signals = []
 
-    # 信号1: 2根阳线实体突破上轨，其中一个阳线上半部分（high - open）是下半部分（open - low）的2倍
+    # 信号1: 2根阳线实体突破上轨，其中一个阳线上半部分（close - upper）是下半部分（upper - open）的2倍
     bull1_break = prev["is_bull"] and prev["open"] <= prev["upper"] < prev["close"]
     bull2_break = latest["is_bull"] and latest["open"] <= latest["upper"] < latest["close"]
     if prev["is_bull"] and latest["is_bull"] and (bull1_break or bull2_break):
-        cond_prev = (prev["high"] - prev["open"]) >= 2 * (prev["open"] - prev["low"])
-        cond_latest = (latest["high"] - latest["open"]) >= 2 * (latest["open"] - latest["low"])
+        cond_prev = (prev["close"] - prev["upper"]) >= 2 * (prev["upper"] - prev["open"])
+        cond_latest = (latest["close"] - latest["upper"]) >= 2 * (latest["upper"] - latest["open"])
         if cond_prev or cond_latest:
             signals.append(f"🚀2根阳线实体突破上轨 + 其中一根上半部分是下半部分的2倍 → 主升浪多信号")
 
