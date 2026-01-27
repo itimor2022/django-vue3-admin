@@ -17,7 +17,7 @@ from datetime import datetime
 
 
 # ==================== 配置区 ====================
-CHAT_ID = "-4966987679"
+CHAT_ID = "-4836241115"
 TOKEN = "8444348700:AAGqkeUUuB_0rI_4qIaJxrTylpRGh020wU0"
 BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
 
