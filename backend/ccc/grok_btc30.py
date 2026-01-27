@@ -1,224 +1,201 @@
 # -*- coding: utf-8 -*-
+"""
+BTC 15分钟布林线趋势监控脚本（2025版 - 主升浪多，无去重）
+核心：以15分钟布林线（25,2）作为主要多头趋势判断依据
+- 只检测多头信号，特别是主升浪多
+- 信号1: 2根阳线实体突破上轨，其中一个阳线上半部分（high - open）是下半部分（open - low）的2倍
+  （实体突破定义为：open <= upper < close）
+- 结合EMA金叉、ADX、锤头线、放量等辅助确认（仅多头相关）
+- 每次运行只要有信号就发送消息（无去重，适合实时监控）
+- 所有触发信号一次性整合成一条消息，避免刷屏
+"""
+
 import requests
 import pandas as pd
+import numpy as np
 from datetime import datetime
-import os
+
 
 # ==================== 配置区 ====================
-chat_id = "-4966987679"
+CHAT_ID = "-4966987679"
 TOKEN = "8444348700:AAGqkeUUuB_0rI_4qIaJxrTylpRGh020wU0"
-BASE_URL = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-LOCK_FILE = "155_multi_signal_lock.txt"
-LOCK_SECONDS = 1800  # 30分钟冷却，可调短到900（15min）
+BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
 
-# ==================== 工具函数 ====================
-def send(msg):
+
+def send_message(msg):
+    url = f"{BASE_URL}/sendMessage"
+    payload = {
+        "chat_id": CHAT_ID,
+        "text": msg,
+        "parse_mode": "HTML",
+        "disable_web_page_preview": True
+    }
     try:
-        requests.post(
-            BASE_URL,
-            json={
-                "chat_id": chat_id,
-                "text": msg,
-                "parse_mode": "HTML",
-                "disable_web_page_preview": True
-            },
-            timeout=10
-        )
-    except:
-        pass
+        r = requests.get(url, params=payload, timeout=10)
+        if not r.json().get("ok"):
+            print("Telegram发送失败:", r.json())
+    except Exception as e:
+        print("发送异常:", e)
 
-def can_send(sig_type):
-    if not os.path.exists(LOCK_FILE):
-        return True
 
-    now = datetime.now()
-    valid = []
-    with open(LOCK_FILE, encoding="utf-8") as f:
-        for line in f:
-            if not line.strip():
-                continue
-            t, tm = line.strip().split("|")
-            tm = datetime.fromisoformat(tm)
-            if (now - tm).total_seconds() < LOCK_SECONDS:
-                valid.append((t, tm))
-                if t == sig_type:
-                    return False
-
-    with open(LOCK_FILE, "w", encoding="utf-8") as f:
-        for t, tm in valid:
-            f.write(f"{t}|{tm.isoformat()}\n")
-
-    return True
-
-def record(sig_type):
-    with open(LOCK_FILE, "a", encoding="utf-8") as f:
-        f.write(f"{sig_type}|{datetime.now().isoformat()}\n")
-
-# ==================== K线 & 指标 ====================
-def get(bar="15m", limit=500):
+def get_candles(instId="BTC-USDT", bar="15m", limit=300):
     url = "https://www.okx.com/api/v5/market/candles"
-    params = {"instId": "BTC-USDT", "bar": bar, "limit": limit}
+    params = {"instId": instId, "bar": bar, "limit": limit}
     try:
-        d = requests.get(url, params=params, timeout=10).json()["data"]
-        df = pd.DataFrame(
-            d,
-            columns=["ts","open","high","low","close","vol","volCcy","volCcyQuote","confirm"]
-        )
+        r = requests.get(url, params=params, timeout=10)
+        data = r.json()["data"]
+        df = pd.DataFrame(data, columns=["ts", "open", "high", "low", "close", "vol", "volCcy", "volCcyQuote", "confirm"])
         df["ts"] = pd.to_datetime(df["ts"].astype(int), unit='ms') + pd.Timedelta(hours=7)  # 亚洲时间
-        df = df.astype({
-            "open": float, "high": float, "low": float, "close": float, "vol": float
-        })
-        return df.sort_values("ts").reset_index(drop=True)
-    except:
+        df = df.astype({"open": float, "high": float, "low": float, "close": float, "vol": float})
+        df = df[["ts", "open", "high", "low", "close", "vol"]].sort_values("ts").reset_index(drop=True)
+        return df
+    except Exception as e:
+        print("获取K线失败:", e)
         return pd.DataFrame()
 
-def add_tech(df):
-    df["e8"]  = df["close"].ewm(span=8, adjust=False).mean()
-    df["e21"] = df["close"].ewm(span=21, adjust=False).mean()
-    df["e55"] = df["close"].ewm(span=55, adjust=False).mean()
 
-    df["sma20"] = df["close"].rolling(20).mean()
-    df["std20"] = df["close"].rolling(20).std()
-    df["upper"] = df["sma20"] + 2 * df["std20"]
-    df["lower"] = df["sma20"] - 2 * df["std20"]
+def add_technical_indicators(df):
+    if len(df) < 50:
+        return df
 
-    df["vol20"] = df["vol"].rolling(20).mean()
+    # 基础指标
+    df["return"] = df["close"].pct_change() * 100
+    df["ema12"] = df["close"].ewm(span=12, adjust=False).mean()
+    df["ema21"] = df["close"].ewm(span=21, adjust=False).mean()
+    df["ema_cross_up"] = (df["ema12"].shift(1) <= df["ema21"].shift(1)) & (df["ema12"] > df["ema21"])
+    df["ema_cross_dn"] = (df["ema12"].shift(1) >= df["ema21"].shift(1)) & (df["ema12"] < df["ema21"])
+    df["trend_ema"] = np.where(df["ema12"] > df["ema21"], 1, -1)
+
+    # BOLL 25,2（核心）
+    df["sma25"] = df["close"].rolling(25).mean()
+    df["std25"] = df["close"].rolling(25).std()
+    df["upper"] = df["sma25"] + 2 * df["std25"]
+    df["lower"] = df["sma25"] - 2 * df["std25"]
+    df["mid"] = df["sma25"]
+
+    # ADX
+    def calc_adx(high, low, close, period=14):
+        df_temp = pd.DataFrame({"high": high, "low": low, "close": close})
+        plus_dm = high.diff()
+        minus_dm = low.diff()
+        plus_dm[plus_dm < 0] = 0
+        minus_dm[minus_dm > 0] = 0
+        minus_dm = abs(minus_dm)
+
+        tr1 = pd.DataFrame(high - low)
+        tr2 = pd.DataFrame(abs(high - close.shift(1)))
+        tr3 = pd.DataFrame(abs(low - close.shift(1)))
+        tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+        atr = tr.rolling(period).mean()
+
+        plus_di = 100 * (plus_dm.ewm(alpha=1/period).mean() / atr)
+        minus_di = 100 * (minus_dm.ewm(alpha=1/period).mean() / atr)
+        dx = (abs(plus_di - minus_di) / (plus_di + minus_di)) * 100
+        adx = dx.ewm(alpha=1/period).mean()
+        return adx
+
+    df["adx"] = calc_adx(df["high"], df["low"], df["close"])
+
+    # 锤头线
+    df["lower_shadow"] = (df[["open", "close"]].min(axis=1) - df["low"]) / (df["high"] - df["low"] + 1e-8)
+    df["is_hammer"] = (df["lower_shadow"] > 0.65) & (df["close"] > df["open"])
+
+    # 放量
+    df["vol_ma20"] = df["vol"].rolling(20).mean()
+    df["vol_spike"] = df["vol"] > df["vol_ma20"] * 1.5
+
+    # 阳线/阴线
+    df["is_bull"] = df["close"] > df["open"]
+    df["entity_size"] = abs(df["close"] - df["open"])
+
     return df
 
-# ==================== 形态检测（增强版） ====================
-def detect_patterns(df, window=60, tolerance=0.05):
-    if len(df) < window + 20:
-        return "none", None
 
-    hist = df.iloc[:-1]  # 不含当前K
-    current_price = df["close"].iloc[-1]
-
-    highs = hist["high"].values
-    lows = hist["low"].values
-
-    peaks = []
-    troughs = []
-
-    # 找局部高点和低点
-    for i in range(5, len(highs)-5):
-        if highs[i] == highs[i-5:i+6].max():
-            peaks.append((i, highs[i]))
-    for i in range(5, len(lows)-5):
-        if lows[i] == lows[i-5:i+6].min():
-            troughs.append((i, lows[i]))
-
-    # --- 双顶/双底 ---
-    if len(peaks) >= 2:
-        p2_idx, p2 = peaks[-1]
-        for j in range(len(peaks)-2, -1, -1):
-            p1_idx, p1 = peaks[j]
-            span = p2_idx - p1_idx
-            if 10 <= span <= window and abs(p1 - p2)/max(p1,p2) <= tolerance:
-                neckline = hist["low"].iloc[p1_idx:p2_idx+1].min()
-                if current_price < neckline * 0.995:
-                    return "double_top_confirmed", {"neckline": neckline, "type": "DT"}
-                elif abs(current_price - neckline)/neckline < 0.01:
-                    return "double_top_near_break", {"neckline": neckline, "type": "DT"}
-                else:
-                    return "double_top_forming", {"neckline": neckline, "type": "DT"}
-
-    if len(troughs) >= 2:
-        t2_idx, t2 = troughs[-1]
-        for j in range(len(troughs)-2, -1, -1):
-            t1_idx, t1 = troughs[j]
-            span = t2_idx - t1_idx
-            if 10 <= span <= window and abs(t1 - t2)/max(t1,t2) <= tolerance:
-                neckline = hist["high"].iloc[t1_idx:t2_idx+1].max()
-                if current_price > neckline * 1.005:
-                    return "double_bottom_confirmed", {"neckline": neckline, "type": "DB"}
-                elif abs(current_price - neckline)/neckline < 0.01:
-                    return "double_bottom_near_break", {"neckline": neckline, "type": "DB"}
-                else:
-                    return "double_bottom_forming", {"neckline": neckline, "type": "DB"}
-
-    # --- 简单头肩顶/底（3个峰/谷） ---
-    if len(peaks) >= 3:
-        p3_idx, p3 = peaks[-1]
-        p2_idx, p2 = peaks[-2]
-        p1_idx, p1 = peaks[-3]
-        if 15 <= p3_idx - p1_idx <= window*1.5:
-            if abs(p1 - p3)/max(p1,p3) <= tolerance*1.2 and p2 > max(p1,p3)*1.005:
-                neckline = hist["low"].iloc[p1_idx:p3_idx+1].min()
-                if current_price < neckline * 0.995:
-                    return "head_shoulder_top_confirmed", {"neckline": neckline}
-                elif abs(current_price - neckline)/neckline < 0.01:
-                    return "head_shoulder_top_near_break", {"neckline": neckline}
-
-    if len(troughs) >= 3:
-        t3_idx, t3 = troughs[-1]
-        t2_idx, t2 = troughs[-2]
-        t1_idx, t1 = troughs[-1]
-        if 15 <= t3_idx - t1_idx <= window*1.5:
-            if abs(t1 - t3)/max(t1,t3) <= tolerance*1.2 and t2 < min(t1,t3)*0.995:
-                neckline = hist["high"].iloc[t1_idx:t3_idx+1].max()
-                if current_price > neckline * 1.005:
-                    return "head_shoulder_bottom_confirmed", {"neckline": neckline}
-                elif abs(current_price - neckline)/neckline < 0.01:
-                    return "head_shoulder_bottom_near_break", {"neckline": neckline}
-
-    return "none", None
-
-# ==================== 主程序 ====================
-def main():
-    df15 = add_tech(get("15m", limit=500)).dropna().reset_index(drop=True)
-    if len(df15) < 150:
+def trend_alert(df_15m):
+    if df_15m.empty or len(df_15m) < 3:
         return
 
-    l15 = df15.iloc[-1]
-    price = l15["close"]
-    ts = l15["ts"].strftime("%m-%d %H:%M")
+    latest = df_15m.iloc[-1]  # 当前（第二阳线）
+    prev = df_15m.iloc[-2]    # 第一阳线
 
-    pattern, details = detect_patterns(df15)
+    close = latest["close"]
+    ts = latest["ts"].strftime("%m-%d %H:%M")
+    title = f"15m BTC-USDT - {ts}"
 
-    msg = ""
-    sig_type = ""
+    # 核心：布林方向（只关注多头相关）
+    boll_direction = "震荡"
+    if close > latest["mid"]:
+        boll_direction = "多头方向"
 
-    if pattern == "double_top_confirmed" and can_send("DT_CONF"):
-        msg = f"""<b>【15m 双顶确认·强空】</b> {ts} ${price:.1f}
-跌破颈线 {details['neckline']:.1f}
-建议：清多 / 试空"""
-        sig_type = "DT_CONF"
+    # 收集所有触发信号（只多头）
+    signals = []
 
-    elif pattern == "double_bottom_confirmed" and can_send("DB_CONF"):
-        msg = f"""<b>【15m 双底确认·强多】</b> {ts} ${price:.1f}
-突破颈线 {details['neckline']:.1f}
-建议：顺势做多"""
-        sig_type = "DB_CONF"
+    # 信号1: 2根阳线实体突破上轨，其中一个阳线上半部分（high - open）是下半部分（open - low）的2倍
+    bull1_break = prev["is_bull"] and prev["open"] <= prev["upper"] < prev["close"]
+    bull2_break = latest["is_bull"] and latest["open"] <= latest["upper"] < latest["close"]
+    if prev["is_bull"] and latest["is_bull"] and (bull1_break or bull2_break):
+        cond_prev = (prev["high"] - prev["open"]) >= 2 * (prev["open"] - prev["low"])
+        cond_latest = (latest["high"] - latest["open"]) >= 2 * (latest["open"] - latest["low"])
+        if cond_prev or cond_latest:
+            signals.append(f"🚀2根阳线实体突破上轨 + 其中一根上半部分是下半部分的2倍 → 主升浪多信号")
 
-    elif pattern == "double_top_near_break" and can_send("DT_NEAR"):
-        msg = f"""【15m 双顶接近突破】 {ts} ${price:.1f}
-颈线 {details['neckline']:.1f} 附近
-警惕空头信号"""
-        sig_type = "DT_NEAR"
+    # 辅助信号: EMA金叉 + ADX（门槛15，强度分三级）
+    if latest["ema_cross_up"] and latest["adx"] > 15:
+        if latest["adx"] > 30:
+            strength = "强"
+        elif latest["adx"] > 20:
+            strength = "中"
+        else:
+            strength = "弱"
+        signals.append(f"🚀EMA12上穿21 + ADX={latest['adx']:.1f} ({strength}) → 多头趋势启动")
 
-    elif pattern == "double_bottom_near_break" and can_send("DB_NEAR"):
-        msg = f"""【15m 双底接近突破】 {ts} ${price:.1f}
-颈线 {details['neckline']:.1f} 附近
-警惕多头信号"""
-        sig_type = "DB_NEAR"
+    # 辅助信号: 锤头线探底回升
+    if latest["is_hammer"] and latest["close"] > latest["mid"] and latest["vol_spike"]:
+        signals.append(f"🔥锤头线探底回升（下影{latest['lower_shadow']:.1%}）+ 放量 → 底部反击")
 
-    elif pattern == "head_shoulder_top_confirmed" and can_send("HST_CONF"):
-        msg = f"""<b>【15m 头肩顶确认·强空】</b> {ts} ${price:.1f}
-跌破颈线 {details['neckline']:.1f}
-建议：清多 / 试空"""
-        sig_type = "HST_CONF"
+    # 辅助信号: 连续破轨（只多头：连续2根破布林上轨）
+    if (prev["close"] > prev["upper"]) and (latest["close"] > latest["upper"]) and close > latest["mid"]:
+        signals.append(f"🚀连续2根破布林上轨 + 多头方向 → 疯狂追涨")
 
-    elif pattern == "head_shoulder_bottom_confirmed" and can_send("HSB_CONF"):
-        msg = f"""<b>【15m 头肩底确认·强多】</b> {ts} ${price:.1f}
-突破颈线 {details['neckline']:.1f}
-建议：顺势做多"""
-        sig_type = "HSB_CONF"
+    # 辅助信号: 放量确认（只多头）
+    if latest["vol_spike"] and close > latest["mid"]:
+        signals.append(f"📈放量上涨 + 布林多头方向 → 趋势增强")
 
-    if msg and sig_type:
-        send(msg)
-        record(sig_type)
+    # 辅助信号: 价格靠近上轨（预警，只多头）
+    if close > latest["upper"] * 0.98 and close <= latest["upper"]:
+        signals.append(f"🔼接近布林上轨 → 多头强势预警")
 
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] BTC {price:.0f} | {pattern}")
+    # 构建并发送消息（只要有信号就发，无去重）
+    if signals:
+        msg = f"【15分钟布林主升浪多趋势报告】{title}\n\n"
+        msg += f"当前方向：{boll_direction}\n"
+        msg += f"价格：${close:.0f} | 中轨：${latest['mid']:.0f}\n"
+        msg += "──────────────\n"
 
-if __name__ == "__main__":
+        for sig in signals:
+            msg += f"{sig}\n"
+
+        msg += f"\n📊 ADX: {latest['adx']:.1f} | EMA趋势: {'多头' if latest['trend_ema']==1 else '空头'}"
+
+        send_message(msg)
+        print(f"【{datetime.now().strftime('%H:%M')}】发送布林主升浪多趋势报告 - {len(signals)}个信号")
+    else:
+        print(f"【{datetime.now().strftime('%H:%M')}】无主升浪多信号")
+
+    # 控制台打印当前状态
+    print(f"{datetime.now().strftime('%m-%d %H:%M')} | BTC ${close:.0f} | 布林方向: {boll_direction} | ADX: {latest['adx']:.1f}")
+
+
+def main():
+    df_15m = get_candles("BTC-USDT", "15m", 300)
+    if df_15m.empty:
+        print("无法获取15分钟K线")
+        return
+
+    df_15m = add_technical_indicators(df_15m)
+    trend_alert(df_15m)
+
+
+if __name__ == '__main__':
+    print("BTC 15分钟布林线主升浪多趋势监控启动（无去重）...")
     main()
