@@ -113,12 +113,8 @@ def trend_alert(df_15m):
             signals.append(f"🚀2根阳线实体突破上轨 + 其中一根上半部分是下半部分的2倍 → 主升浪多信号")
 
     # 辅助信号: 连续破轨（只多头：连续2根破布林上轨）
-    if (prev["close"] > prev["upper"]) and (latest["close"] > latest["upper"]) and close > latest["mid"]:
-        signals.append(f"🚀连续2根破布林上轨 + 多头方向 → 疯狂追涨")
-
-    # 辅助信号: 放量确认（只多头）
-    if latest["vol_spike"] and close > latest["mid"]:
-        signals.append(f"📈放量上涨 + 布林多头方向 → 趋势增强")
+    if (prev["is_bull"] and prev["close"] > prev["upper"]) and (latest["is_bull"] and latest["close"] > latest["upper"]) and close > latest["mid"]:
+        signals.append(f"🚀连续2根阳线破布林上轨 + 多头方向 → 疯狂追涨")
 
     # 构建并发送消息（只要有信号就发，无去重）
     if signals:
